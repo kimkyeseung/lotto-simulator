@@ -1,6 +1,11 @@
-export function generateLottoNumbers(): number[] {
+export function generateLottoNumbers({
+  isContainBonusNumber = false,
+}: {
+  isContainBonusNumber?: boolean
+}): number[] {
   const numbers: number[] = []
-  while (numbers.length < 6) {
+  const limit = isContainBonusNumber ? 7 : 6
+  while (numbers.length < limit) {
     // 1부터 45까지의 무작위 정수 생성
     const randomNumber = Math.floor(Math.random() * 45) + 1
 

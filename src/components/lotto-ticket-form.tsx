@@ -9,6 +9,14 @@ import {
 } from '@/lib/lotto'
 import { LottoForm } from '@/components/lotto-form'
 
+const formNameMap = {
+  0: 'A',
+  1: 'B',
+  2: 'C',
+  3: 'D',
+  4: 'E',
+}
+
 // 로또 폼의 초기 상태를 담을 배열
 const initialForms: LottoFormSchema[] = Array.from({ length: 5 }, () => ({
   isEnabled: true,
@@ -32,7 +40,7 @@ export function LottoTicketsForm() {
   }
 
   function getWinningNumbers() {
-    const winningNumbers = generateLottoNumbers()
+    const winningNumbers = generateLottoNumbers({ isContainBonusNumber: true })
 
     setWinningNumbers(winningNumbers)
   }
@@ -53,6 +61,7 @@ export function LottoTicketsForm() {
       <div className='grid w-full grid-cols-1 gap-6 lg:grid-cols-5'>
         {formData.map((_data, index) => (
           <LottoForm
+            formName={formNameMap[index as keyof typeof formNameMap]}
             key={index}
             onFormChange={(newData) => handleFormChange(index, newData)}
           />

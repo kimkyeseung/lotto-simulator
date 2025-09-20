@@ -2,9 +2,11 @@ import { cn } from '@/lib/utils'
 
 interface Props {
   children: number
+  isDeactivated?: boolean
+  isSmall?: boolean
 }
 
-export function NumberBall({ children }: Props) {
+export function NumberBall({ children, isDeactivated, isSmall }: Props) {
   const color =
     children <= 10
       ? 'bg-chart-1'
@@ -18,8 +20,9 @@ export function NumberBall({ children }: Props) {
   return (
     <div
       className={cn(
-        color,
-        'flex items-center justify-center rounded-full lg:h-8 lg:w-8 text-white'
+        isDeactivated ? 'bg-muted text-gray-400' : [color, 'text-white'],
+        'flex items-center justify-center rounded-full',
+        isSmall ? 'h-6 w-6 text-xs' : 'h-8 w-8 text-sm'
       )}
     >
       {children}

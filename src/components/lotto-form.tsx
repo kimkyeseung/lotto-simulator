@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { lottoFormSchema, type LottoFormSchema } from '@/schemas/lotto'
+import { NumberBall } from './ui/number-ball'
 import { Switch } from './ui/switch'
 
 // Tailwind CSS를 활용한 버튼 스타일
@@ -12,15 +13,16 @@ const numberButtonClass = (isSelected: boolean, isDisabled: boolean) =>
     isDisabled
       ? 'bg-gray-200 border-gray-200 text-gray-500 cursor-not-allowed'
       : isSelected
-        ? 'bg-blue-600 border-blue-600 text-white'
+        ? 'bg-primary border-primary text-white'
         : 'bg-white border-gray-300 text-gray-800 hover:bg-gray-100'
   }`
 
 interface LottoFormProps {
   onFormChange: (data: LottoFormSchema) => void
+  formName: string
 }
 
-export function LottoForm({ onFormChange }: LottoFormProps) {
+export function LottoForm({ onFormChange, formName }: LottoFormProps) {
   const form = useForm<LottoFormSchema>({
     resolver: zodResolver(lottoFormSchema),
     defaultValues: {
@@ -53,51 +55,67 @@ export function LottoForm({ onFormChange }: LottoFormProps) {
   }
 
   return (
-    <div className='flex flex-col space-y-4 rounded-lg border bg-white p-4 shadow-sm'>
-      <div className='flex items-center justify-end gap-2'>
-        <label className='text-sm text-gray-800'>사용</label>
-        <Switch
-          checked={isEnabled}
-          onCheckedChange={(value) => {
-            setValue('isEnabled', value)
-          }}
-        />
+    <div className='flex flex-col overflow-hidden rounded-lg border bg-white shadow-sm'>
+      <div className='flex justify-center bg-gray-200 text-xs text-white'>
+        {formName}
       </div>
-      <div
-        className={`grid grid-cols-6 gap-2 sm:grid-cols-7 md:grid-cols-9 lg:grid-cols-10 ${isEnabled ? '' : 'opacity-50'}`}
-      >
-        {Array.from({ length: 45 }, (_, i) => i + 1).map((number) => (
-          <button
-            key={number}
-            type='button'
-            onClick={() => handleNumberClick(number)}
-            className={numberButtonClass(
-              selectedNumbers.includes(number),
-              !isEnabled
+      <div className='space-y-4 p-4'>
+        <div className='flex items-center justify-end gap-2'>
+          <label className='text-sm text-gray-800'>사용</label>
+          <Switch
+            checked={isEnabled}
+            onCheckedChange={(value) => {
+              setValue('isEnabled', value)
+            }}
+          />
+        </div>
+        <div
+          className={`grid grid-cols-6 gap-2 sm:grid-cols-7 md:grid-cols-9 lg:grid-cols-10 ${isEnabled ? '' : 'opacity-50'}`}
+        >
+          {Array.from({ length: 45 }, (_, i) => i + 1).map((number) => (
+            <button
+              key={number}
+              type='button'
+              onClick={() => handleNumberClick(number)}
+              className={numberButtonClass(
+                selectedNumbers.includes(number),
+                !isEnabled
+              )}
+              disabled={
+                !isEnabled ||
+                (!selectedNumbers.includes(number) &&
+                  selectedNumbers.length >= 6)
+              }
+            >
+              {number}
+            </button>
+          ))}
+        </div>
+        {isEnabled && (
+          <div className='justify-endtext-gray-800'>
+            선택된 번호:
+            {selectedNumbers.length > 0 ? (
+              <div className='flex gap-1'>
+                {selectedNumbers
+                  .sort((a, b) => a - b)
+                  .map((number) => (
+                    <NumberBall isSmall key={number}>
+                      {number}
+                    </NumberBall>
+                  ))}
+              </div>
+            ) : (
+              '없음'
             )}
-            disabled={
-              !isEnabled ||
-              (!selectedNumbers.includes(number) && selectedNumbers.length >= 6)
-            }
-          >
-            {number}
-          </button>
-        ))}
+          </div>
+        )}
+        {isEnabled && (
+          <div className='text-sm text-gray-500'>
+            {selectedNumbers.length !== 6 &&
+              `${6 - selectedNumbers.length}개의 번호가 자동으로 선택`}
+          </div>
+        )}
       </div>
-      {isEnabled && (
-        <div className='justify-endtext-gray-800 flex'>
-          선택된 번호:{' '}
-          {selectedNumbers.length > 0
-            ? selectedNumbers.sort((a, b) => a - b).join(', ')
-            : '없음'}
-        </div>
-      )}
-      {isEnabled && (
-        <div className='text-sm text-gray-500'>
-          {selectedNumbers.length !== 6 &&
-            `${6 - selectedNumbers.length}개의 번호가 자동으로 선택.`}
-        </div>
-      )}
     </div>
   )
 }
