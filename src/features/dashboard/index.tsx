@@ -14,6 +14,8 @@ import { TopNav } from '@/components/layout/top-nav'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
+import { Lotto } from './components/lotto'
+import { LottoResult } from './components/lotto-result'
 import { Overview } from './components/overview'
 import { RecentSales } from './components/recent-sales'
 
@@ -47,18 +49,33 @@ export function Dashboard() {
           <div className='w-full overflow-x-auto pb-2'>
             <TabsList>
               <TabsTrigger value='overview'>Overview</TabsTrigger>
-              <TabsTrigger value='analytics' disabled>
-                Analytics
-              </TabsTrigger>
-              <TabsTrigger value='reports' disabled>
-                Reports
-              </TabsTrigger>
-              <TabsTrigger value='notifications' disabled>
-                Notifications
-              </TabsTrigger>
+              <TabsTrigger value='analytics'>Analytics</TabsTrigger>
+              <TabsTrigger value='reports'>Reports</TabsTrigger>
+              <TabsTrigger value='notifications'>Notifications</TabsTrigger>
             </TabsList>
           </div>
           <TabsContent value='overview' className='space-y-4'>
+            <Card className='col-span-1 lg:col-span-4'>
+              <CardHeader>
+                <CardTitle>로또 구매하기 (5줄)</CardTitle>
+              </CardHeader>
+              <CardContent className='ps-2'>
+                <Lotto />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>당첨 결과</CardTitle>
+              </CardHeader>
+
+              <CardContent className='ps-2'>
+                <LottoResult />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value='analytics' className='space-y-4'>
             <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
               <Card>
                 <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
