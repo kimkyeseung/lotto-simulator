@@ -1,13 +1,9 @@
 'use client'
 
-import { useMemo, useState, useEffect, useCallback } from 'react'
+import { useMemo, useState } from 'react'
 import { lottoFormSchema, type LottoFormSchema } from '@/schemas/lotto'
 import { useConfigStore } from '@/stores/config'
-import { useResultStore } from '@/stores/result'
-import {
-  generateLottoNumbers,
-  normalizeAndCompleteLottoNumbers,
-} from '@/lib/lotto'
+import { useLotto } from '@/hooks/use-lotto'
 import { LottoForm } from '@/components/lotto-form'
 import { Button } from './ui/button'
 
@@ -29,12 +25,12 @@ export function LottoTicketsForm() {
   const { isAutoRunning } = useConfigStore()
 
   const [formData, setFormData] = useState<LottoFormSchema[]>(initialForms)
-  const validForms = useMemo(() => {
-    return formData.filter((form) => lottoFormSchema.safeParse(form).success)
-  }, [formData])
+  const validForms = useMemo(
+    () => formData.filter((form) => lottoFormSchema.safeParse(form).success),
+    [formData]
+  )
 
-  const { setSubmittedTickets, setWinningNumbers, setUsedMoney } =
-    useResultStore()
+  const { onSubmit, isSubmitDisabled, cost } = useLotto(validForms)
 
   const handleFormChange = (index: number, newFormData: LottoFormSchema) => {
     setFormData((prev) => {
@@ -43,43 +39,6 @@ export function LottoTicketsForm() {
       return newForms
     })
   }
-
-  const getWinningNumbers = useCallback(() => {
-    const winningNumbers = generateLottoNumbers({ isContainBonusNumber: true })
-
-    setWinningNumbers(winningNumbers)
-  }, [setWinningNumbers])
-
-  const isSubmitDisabled = validForms.length === 0
-
-  const cost = validForms.length * 1000
-
-  const onSubmit = useCallback(() => {
-    if (!isSubmitDisabled) {
-      setUsedMoney(cost)
-      setSubmittedTickets(
-        validForms.map((form) => normalizeAndCompleteLottoNumbers(form.numbers))
-      )
-      getWinningNumbers()
-    }
-  }, [
-    isSubmitDisabled,
-    setUsedMoney,
-    cost,
-    setSubmittedTickets,
-    validForms,
-    getWinningNumbers,
-  ])
-
-  useEffect(() => {
-    if (isAutoRunning) {
-      const interval = setInterval(() => {
-        onSubmit()
-      }, 100)
-
-      return () => clearInterval(interval)
-    }
-  }, [isAutoRunning, onSubmit])
 
   return (
     <div className='flex flex-col items-center space-y-4 bg-gray-50 p-8'>

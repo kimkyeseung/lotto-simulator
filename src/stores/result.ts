@@ -7,6 +7,8 @@ interface ResultState {
   // 사용한 돈, 제출된 티켓
   usedMoney: number
   setUsedMoney: (money: number) => void
+  addUsedMoney: (money: number) => void
+
   submittedTickets: Tickets
   setSubmittedTickets: (tickets: Tickets) => void
 
@@ -16,6 +18,11 @@ interface ResultState {
   winningRankCounts: Record<string, number>
   setWinningRankCounts: (counts: Record<string, number>) => void
 
+  // 당첨금
+  totalPrize: number
+  setTotalPrize: (amount: number) => void
+  addTotalPrize: (amount: number) => void
+
   // 수익률
   profitRate: number
   setProfitRate: (rate: number) => void
@@ -24,6 +31,8 @@ interface ResultState {
 export const useResultStore = create<ResultState>((set) => ({
   usedMoney: 0,
   setUsedMoney: (money) => set(() => ({ usedMoney: money })),
+  addUsedMoney: (money: number) =>
+    set((state) => ({ usedMoney: state.usedMoney + money })),
   submittedTickets: [],
   setSubmittedTickets: (tickets) => set(() => ({ submittedTickets: tickets })),
   winningNumbers: null,
@@ -32,4 +41,8 @@ export const useResultStore = create<ResultState>((set) => ({
   setWinningRankCounts: (counts) => set(() => ({ winningRankCounts: counts })),
   profitRate: 0,
   setProfitRate: (rate) => set(() => ({ profitRate: rate })),
+  totalPrize: 0,
+  setTotalPrize: (amount) => set(() => ({ totalPrize: amount })),
+  addTotalPrize: (amount) =>
+    set((state) => ({ totalPrize: state.totalPrize + amount })),
 }))
