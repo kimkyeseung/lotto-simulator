@@ -9,6 +9,10 @@ interface ResultState {
   setUsedMoney: (money: number) => void
   addUsedMoney: (money: number) => void
 
+  submittedCount: number
+  setSubmittedCount: (count: number) => void
+  addSubmittedCount: (count: number) => void
+
   submittedTickets: Tickets
   setSubmittedTickets: (tickets: Tickets) => void
 
@@ -33,6 +37,10 @@ export const useResultStore = create<ResultState>((set) => ({
   setUsedMoney: (money) => set(() => ({ usedMoney: money })),
   addUsedMoney: (money: number) =>
     set((state) => ({ usedMoney: state.usedMoney + money })),
+  submittedCount: 0,
+  setSubmittedCount: (count) => set(() => ({ submittedCount: count })),
+  addSubmittedCount: (count) =>
+    set((state) => ({ submittedCount: state.submittedCount + count })),
   submittedTickets: [],
   setSubmittedTickets: (tickets) => set(() => ({ submittedTickets: tickets })),
   winningNumbers: null,

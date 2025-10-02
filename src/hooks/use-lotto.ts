@@ -15,6 +15,7 @@ export function useLotto(validForms: LottoFormSchema[]) {
     setWinningNumbers,
     addUsedMoney,
     addTotalPrize,
+    addSubmittedCount,
   } = useResultStore()
 
   const getWinningNumbers = useCallback(() => {
@@ -27,35 +28,36 @@ export function useLotto(validForms: LottoFormSchema[]) {
   const isSubmitDisabled = useMemo(() => validForms.length === 0, [validForms])
   const cost = useMemo(() => validForms.length * 1000, [validForms])
 
-  // function getPrize(forms: number[][]) {
-  // }
-
   const onSubmit = useCallback(() => {
-    if (!isSubmitDisabled) {
-      addUsedMoney(cost)
-      const normalizedForms = validForms.map((form) =>
-        normalizeAndCompleteLottoNumbers(form.numbers)
-      )
-      setSubmittedTickets(normalizedForms)
-      const winningNumbers = getWinningNumbers()
-
-      const prizes = normalizedForms.reduce((acc, form) => {
-        const result = checkLottoResult(form, winningNumbers)
-        const prize = prizeMap[result.rank as keyof typeof prizeMap] || 0
-        return acc + prize
-      }, 0)
-
-      addTotalPrize(prizes)
+    if (isSubmitDisabled) {
+      return
     }
+
+    addSubmittedCount(1)
+    addUsedMoney(cost)
+    const normalizedForms = validForms.map((form) =>
+      normalizeAndCompleteLottoNumbers(form.numbers)
+    )
+    setSubmittedTickets(normalizedForms)
+    const winningNumbers = getWinningNumbers()
+
+    const prizes = normalizedForms.reduce((acc, form) => {
+      const result = checkLottoResult(form, winningNumbers)
+      const prize = prizeMap[result.rank as keyof typeof prizeMap] || 0
+      return acc + prize
+    }, 0)
+
+    addTotalPrize(prizes)
   }, [
     isSubmitDisabled,
+    addSubmittedCount,
     addUsedMoney,
     cost,
-    setSubmittedTickets,
     validForms,
+    setSubmittedTickets,
     getWinningNumbers,
-    prizeMap,
     addTotalPrize,
+    prizeMap,
   ])
 
   useEffect(() => {
