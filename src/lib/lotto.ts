@@ -1,3 +1,5 @@
+import { type WinningRank } from '@/types/lotto'
+
 export function generateLottoNumbers({
   isContainBonusNumber = false,
 }: {
@@ -49,10 +51,8 @@ export function normalizeAndCompleteLottoNumbers(
   return Array.from(numbers).sort((a, b) => a - b)
 }
 
-type Rank = 0 | 1 | 2 | 3 | 4 | 5
-
 interface WinningResult {
-  rank: Rank
+  rank: WinningRank
   message: string
 }
 
