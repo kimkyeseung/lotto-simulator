@@ -49,7 +49,12 @@ export function normalizeAndCompleteLottoNumbers(
   return Array.from(numbers).sort((a, b) => a - b)
 }
 
-type WinningResult = 0 | 1 | 2 | 3 | 4 | 5
+type Rank = 0 | 1 | 2 | 3 | 4 | 5
+
+interface WinningResult {
+  rank: Rank
+  message: string
+}
 
 export function checkLottoResult(
   userNumbers: number[],
@@ -78,23 +83,22 @@ export function checkLottoResult(
   switch (matchCount) {
     case 6:
       // 1등: 일반 숫자 6개 모두 일치
-      return 1
+      return { rank: 1, message: '1등당첨' }
     case 5:
       if (hasBonus) {
         // 2등: 일반 숫자 5개 + 보너스 번호 일치
-        return 2
+        return { rank: 2, message: '2등당첨' }
       } else {
         // 3등: 일반 숫자 5개 일치
-        return 3
+        return { rank: 3, message: '3등당첨' }
       }
     case 4:
       // 4등: 일반 숫자 4개 일치
-      return 4
+      return { rank: 4, message: '4등당첨' }
     case 3:
       // 5등: 일반 숫자 3개 일치
-      return 5
+      return { rank: 5, message: '5등당첨' }
     default:
-      // 그 외
-      return 0
+      return { rank: 0, message: '낙첨' }
   }
 }

@@ -1,3 +1,5 @@
+import { Play, Pause } from 'lucide-react'
+import { useConfigStore } from '@/stores/config'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -18,8 +20,11 @@ import { Lotto } from './components/lotto'
 import { LottoResult } from './components/lotto-result'
 import { Overview } from './components/overview'
 import { RecentSales } from './components/recent-sales'
+import { Statistics } from './components/statistics'
 
 export function Dashboard() {
+  const { isAutoRunning, toggleAutoRun } = useConfigStore()
+
   return (
     <>
       {/* ===== Top Heading ===== */}
@@ -38,7 +43,14 @@ export function Dashboard() {
         <div className='mb-2 flex items-center justify-between space-y-2'>
           <h1 className='text-2xl font-bold tracking-tight'>Dashboard</h1>
           <div className='flex items-center space-x-2'>
-            <Button>Download</Button>
+            {/* <Button>Download</Button> */}
+            <Button size={'icon'} onClick={toggleAutoRun}>
+              {isAutoRunning ? (
+                <Pause className='size-4' />
+              ) : (
+                <Play className='size-4' />
+              )}
+            </Button>
           </div>
         </div>
         <Tabs
@@ -64,15 +76,27 @@ export function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>당첨 결과</CardTitle>
-              </CardHeader>
+            <div className='grid gap-4 sm:grid-cols-1 lg:grid-cols-2'>
+              <Card>
+                <CardHeader>
+                  <CardTitle>당첨 결과</CardTitle>
+                </CardHeader>
 
-              <CardContent className='ps-2'>
-                <LottoResult />
-              </CardContent>
-            </Card>
+                <CardContent className='ps-2'>
+                  <LottoResult />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>통계</CardTitle>
+                </CardHeader>
+
+                <CardContent className='ps-2'>
+                  <Statistics />
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value='analytics' className='space-y-4'>

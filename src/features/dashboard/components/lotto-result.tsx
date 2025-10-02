@@ -11,15 +11,6 @@ const formNameMap = {
   4: 'E',
 }
 
-const resultMessageMap = {
-  0: '낙첨',
-  5: '5등당첨',
-  4: '4등당첨',
-  3: '3등당첨',
-  2: '2등당첨',
-  1: '1등당첨',
-}
-
 export function LottoResult() {
   const { submittedTickets, winningNumbers } = useResultStore()
 
@@ -48,7 +39,7 @@ export function LottoResult() {
               </TableCell>
               <TableCell>
                 {winningNumbers &&
-                  resultMessageMap[checkLottoResult(ticket, winningNumbers)]}
+                  checkLottoResult(ticket, winningNumbers).message}
               </TableCell>
               <TableCell>
                 <div className='flex gap-2'>
