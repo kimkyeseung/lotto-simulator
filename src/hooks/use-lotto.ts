@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react'
 import { type LottoFormSchema } from '@/schemas/lotto'
+import { type SimulationStats } from '@/types/lotto'
 import { useConfigStore } from '@/stores/config'
 import { useResultStore } from '@/stores/result'
 import {
@@ -7,6 +8,30 @@ import {
   generateLottoNumbers,
   normalizeAndCompleteLottoNumbers,
 } from '@/lib/lotto'
+
+const updateNumberStats = (
+  currentStatsMap: Record<number, SimulationStats>,
+  submittedNumbers: number[],
+  matchedNumbers: number[],
+  winningNumbers: number[]
+) => {
+  // 깊은 복사 대신, 필요한 키만 업데이트하는 방식 사용
+  const newStats = { ...currentStatsMap }
+
+  // 통계 업데이트를 처리하는 헬퍼 함수
+  const updateStat = (num: number, key: keyof SimulationStats) => {
+    if (!newStats[num]) {
+      newStats[num] = { submittedCount: 0, hitCount: 0, resultCount: 0 }
+    }
+    newStats[num][key] += 1
+  }
+
+  submittedNumbers.forEach((num) => updateStat(num, 'submittedCount'))
+  matchedNumbers.forEach((num) => updateStat(num, 'hitCount'))
+  winningNumbers.forEach((num) => updateStat(num, 'resultCount'))
+
+  return newStats
+}
 
 export function useLotto(validForms: LottoFormSchema[]) {
   const { isAutoRunning, prizeMap } = useConfigStore()
@@ -16,6 +41,7 @@ export function useLotto(validForms: LottoFormSchema[]) {
     addUsedMoney,
     addTotalPrize,
     addSubmittedCount,
+    setNumberStatsMap,
   } = useResultStore()
 
   const getWinningNumbers = useCallback(() => {
@@ -27,6 +53,24 @@ export function useLotto(validForms: LottoFormSchema[]) {
 
   const isSubmitDisabled = useMemo(() => validForms.length === 0, [validForms])
   const cost = useMemo(() => validForms.length * 1000, [validForms])
+
+  const recoredNumberStats = useCallback(
+    (
+      submittedNumbers: number[],
+      matchedNumbers: number[],
+      winningNumbers: number[]
+    ) => {
+      setNumberStatsMap((currentStatsMap) =>
+        updateNumberStats(
+          currentStatsMap,
+          submittedNumbers,
+          matchedNumbers,
+          winningNumbers
+        )
+      )
+    },
+    [setNumberStatsMap]
+  )
 
   const onSubmit = useCallback(() => {
     if (isSubmitDisabled) {
@@ -43,6 +87,7 @@ export function useLotto(validForms: LottoFormSchema[]) {
 
     const prizes = normalizedForms.reduce((acc, form) => {
       const result = checkLottoResult(form, winningNumbers)
+      recoredNumberStats(form, result.matchedNumbers, winningNumbers)
       const prize = prizeMap[result.rank as keyof typeof prizeMap] || 0
       return acc + prize
     }, 0)
@@ -57,6 +102,7 @@ export function useLotto(validForms: LottoFormSchema[]) {
     setSubmittedTickets,
     getWinningNumbers,
     addTotalPrize,
+    recoredNumberStats,
     prizeMap,
   ])
 

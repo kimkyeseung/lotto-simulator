@@ -1,4 +1,5 @@
 import { type LottoSchema } from '@/schemas/lotto'
+import { type NumberStatsMap } from '@/types/lotto'
 import { create } from 'zustand'
 
 type Tickets = LottoSchema[]
@@ -27,9 +28,18 @@ interface ResultState {
   setTotalPrize: (amount: number) => void
   addTotalPrize: (amount: number) => void
 
+  // 숫자 통계
+  numberStatsMap: NumberStatsMap
+  setNumberStatsMap: (
+    updater: NumberStatsMap | ((currentStats: NumberStatsMap) => NumberStatsMap)
+  ) => void
+
   // 수익률
   profitRate: number
   setProfitRate: (rate: number) => void
+
+  // 초기화
+  initialize: () => void
 }
 
 export const useResultStore = create<ResultState>((set) => ({
@@ -53,4 +63,26 @@ export const useResultStore = create<ResultState>((set) => ({
   setTotalPrize: (amount) => set(() => ({ totalPrize: amount })),
   addTotalPrize: (amount) =>
     set((state) => ({ totalPrize: state.totalPrize + amount })),
+  numberStatsMap: {},
+  setNumberStatsMap: (updater) => {
+    set((state) => {
+      if (typeof updater === 'function') {
+        const newMap = updater(state.numberStatsMap)
+        return { numberStatsMap: newMap }
+      }
+
+      return { numberStatsMap: updater }
+    })
+  },
+  initialize: () =>
+    set(() => ({
+      usedMoney: 0,
+      submittedCount: 0,
+      submittedTickets: [],
+      winningNumbers: null,
+      winningRankCounts: {},
+      totalPrize: 0,
+      numberStatsMap: {},
+      profitRate: 0,
+    })),
 }))

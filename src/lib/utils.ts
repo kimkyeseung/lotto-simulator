@@ -58,3 +58,21 @@ export function getPageNumbers(currentPage: number, totalPages: number) {
 
   return rangeWithDots
 }
+
+export function formatDecimal(num: number): string {
+  // 숫자를 문자열로 변환 (toPrecision이나 toString 사용)
+  const str = String(num)
+
+  // 정규표현식: 소수점 이하 3자리 이상이 있는 패턴을 찾습니다.
+  // (\.\d{2})\d+ : 소수점(.), 소수 두 자리(\d{2})까지는 그룹 1로 캡처하고,
+  //               그 이후의 모든 숫자(\d+)는 버립니다.
+  const regex = /(\.\d{2})\d+/
+
+  // 패턴이 일치하면 캡처된 그룹 1($1)로 대체합니다.
+  if (regex.test(str)) {
+    return str.replace(regex, '$1')
+  }
+
+  // 패턴이 일치하지 않으면 (소수점 이하 0, 1, 2자리) 원래 문자열을 그대로 반환합니다.
+  return str
+}

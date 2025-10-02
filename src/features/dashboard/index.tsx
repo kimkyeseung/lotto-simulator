@@ -1,6 +1,3 @@
-import { Play, Pause } from 'lucide-react'
-import { useConfigStore } from '@/stores/config'
-import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -16,15 +13,15 @@ import { TopNav } from '@/components/layout/top-nav'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { Lotto } from './components/lotto'
-import { LottoResult } from './components/lotto-result'
-import { Overview } from './components/overview'
-import { RecentSales } from './components/recent-sales'
-import { Statistics } from './components/statistics'
+import { Charts } from './charts'
+import { Controller } from './controller'
+import { Lotto } from './lotto'
+import { LottoResult } from './lotto-result'
+import { Overview } from './overview'
+import { RecentSales } from './recent-sales'
+import { Statistics } from './statistics'
 
 export function Dashboard() {
-  const { isAutoRunning, toggleAutoRun } = useConfigStore()
-
   return (
     <>
       {/* ===== Top Heading ===== */}
@@ -42,16 +39,7 @@ export function Dashboard() {
       <Main>
         <div className='mb-2 flex items-center justify-between space-y-2'>
           <h1 className='text-2xl font-bold tracking-tight'>Dashboard</h1>
-          <div className='flex items-center space-x-2'>
-            {/* <Button>Download</Button> */}
-            <Button size={'icon'} onClick={toggleAutoRun}>
-              {isAutoRunning ? (
-                <Pause className='size-4' />
-              ) : (
-                <Play className='size-4' />
-              )}
-            </Button>
-          </div>
+          <Controller />
         </div>
         <Tabs
           orientation='vertical'
@@ -71,32 +59,50 @@ export function Dashboard() {
               <CardHeader>
                 <CardTitle>로또 구매하기 (5줄)</CardTitle>
               </CardHeader>
-              <CardContent className='ps-2'>
+              <CardContent>
                 <Lotto />
               </CardContent>
             </Card>
 
-            <div className='grid gap-4 sm:grid-cols-1 lg:grid-cols-2'>
-              <Card>
+            <div className='grid gap-4 sm:grid-cols-1 lg:grid-cols-12'>
+              <Card className='lg:col-span-4'>
                 <CardHeader>
                   <CardTitle>당첨 결과</CardTitle>
                 </CardHeader>
 
-                <CardContent className='ps-2'>
+                <CardContent>
                   <LottoResult />
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className='lg:col-span-3'>
                 <CardHeader>
                   <CardTitle>통계</CardTitle>
                 </CardHeader>
 
-                <CardContent className='ps-2'>
+                <CardContent>
                   <Statistics />
                 </CardContent>
               </Card>
+
+              <Card className='lg:col-span-5'>
+                <CardHeader>
+                  <CardTitle>빈칸</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {/* <Charts /> */}
+                </CardContent>
+              </Card>
             </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>차트</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Charts />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value='analytics' className='space-y-4'>
