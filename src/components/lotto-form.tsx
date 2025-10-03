@@ -59,7 +59,7 @@ export function LottoForm({ onFormChange, formName }: LottoFormProps) {
       <div className='flex justify-center bg-gray-200 text-xs text-white'>
         {formName}
       </div>
-      <div className='space-y-4 p-4'>
+      <div className='space-y-4 p-2 md:p-4'>
         <div className='flex items-center justify-end gap-2'>
           <label className='text-sm text-gray-800'>사용</label>
           <Switch
@@ -70,7 +70,7 @@ export function LottoForm({ onFormChange, formName }: LottoFormProps) {
           />
         </div>
         <div
-          className={`grid grid-cols-6 gap-2 sm:grid-cols-7 md:grid-cols-9 lg:grid-cols-10 ${isEnabled ? '' : 'opacity-50'}`}
+          className={`grid grid-cols-12 gap-2 sm:grid-cols-7 md:grid-cols-9 lg:grid-cols-10 ${isEnabled ? '' : 'opacity-50'}`}
         >
           {Array.from({ length: 45 }, (_, i) => i + 1).map((number) => (
             <button

@@ -41,7 +41,7 @@ export function LottoTicketsForm() {
   }
 
   return (
-    <div className='flex flex-col items-center space-y-4 bg-gray-50 p-8'>
+    <div className='flex flex-col items-center space-y-4'>
       <div className='grid w-full grid-cols-1 gap-6 lg:grid-cols-5'>
         {formData.map((_data, index) => (
           <LottoForm
