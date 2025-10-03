@@ -44,10 +44,6 @@ interface ResultState {
     updater: NumberStatsMap | ((currentStats: NumberStatsMap) => NumberStatsMap)
   ) => void
 
-  // 수익률
-  profitRate: number
-  setProfitRate: (rate: number) => void
-
   // 실행 함수
   submitLotto: (forms: LottoFormSchema[]) => void
 
@@ -69,8 +65,6 @@ export const useResultStore = create<ResultState>((set, get) => ({
   setWinningNumbers: (numbers) => set({ winningNumbers: numbers }),
   winningRankCounts: {},
   setWinningRankCounts: (counts) => set({ winningRankCounts: counts }),
-  profitRate: 0,
-  setProfitRate: (rate) => set({ profitRate: rate }),
   totalPrize: 0,
   setTotalPrize: (amount) => set({ totalPrize: amount }),
   addTotalPrize: (amount) =>
@@ -86,6 +80,8 @@ export const useResultStore = create<ResultState>((set, get) => ({
     })
   },
   submitLotto: (validForms: LottoFormSchema[]) => {
+    if (validForms.length === 0) return
+
     const {
       addSubmittedCount,
       addUsedMoney,
@@ -96,8 +92,6 @@ export const useResultStore = create<ResultState>((set, get) => ({
     } = get()
     const { prizeMap } = useConfigStore.getState()
     const cost = validForms.length * 1000
-
-    if (validForms.length === 0) return
 
     addSubmittedCount(1)
     addUsedMoney(cost)
@@ -131,6 +125,5 @@ export const useResultStore = create<ResultState>((set, get) => ({
       winningRankCounts: {},
       totalPrize: 0,
       numberStatsMap: {},
-      profitRate: 0,
     }),
 }))

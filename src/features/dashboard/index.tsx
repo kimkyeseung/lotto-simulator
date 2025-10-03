@@ -14,7 +14,6 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Charts } from './charts'
-import { Controller } from './controller'
 import { Lotto } from './lotto'
 import { LottoResult } from './lotto-result'
 import { Overview } from './overview'
@@ -39,7 +38,6 @@ export function Dashboard() {
       <Main>
         <div className='mb-2 flex items-center justify-between space-y-2'>
           <h1 className='text-2xl font-bold tracking-tight'>Dashboard</h1>
-          <Controller />
         </div>
         <Tabs
           orientation='vertical'
@@ -89,9 +87,7 @@ export function Dashboard() {
                 <CardHeader>
                   <CardTitle>빈칸</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  {/* <Charts /> */}
-                </CardContent>
+                <CardContent>{/* <Charts /> */}</CardContent>
               </Card>
             </div>
 

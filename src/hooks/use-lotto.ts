@@ -1,14 +1,24 @@
 import { useCallback, useEffect, useMemo } from 'react'
-import { type LottoFormSchema } from '@/schemas/lotto'
+import { useShallow } from 'zustand/shallow'
 import { useConfigStore } from '@/stores/config'
+import { selectValidForms, useFormStore } from '@/stores/form'
 import { useResultStore } from '@/stores/result'
 
-export function useLotto(validForms: LottoFormSchema[]) {
+export function useLotto() {
   const { isAutoRunning } = useConfigStore()
-  const { submitLotto } = useResultStore()
+  const { submitLotto, usedMoney, totalPrize } = useResultStore()
+
+  const validForms = useFormStore(
+    useShallow((state) => selectValidForms(state))
+  )
 
   const isSubmitDisabled = useMemo(() => validForms.length === 0, [validForms])
   const cost = useMemo(() => validForms.length * 1000, [validForms])
+
+  const profitRate = useMemo(() => {
+    if (usedMoney === 0) return 0
+    return (totalPrize / usedMoney) * 100
+  }, [usedMoney, totalPrize])
 
   const onSubmit = useCallback(() => {
     if (isSubmitDisabled) {
@@ -31,5 +41,6 @@ export function useLotto(validForms: LottoFormSchema[]) {
     onSubmit,
     isSubmitDisabled,
     cost,
+    profitRate,
   }
 }

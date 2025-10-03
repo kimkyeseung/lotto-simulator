@@ -1,11 +1,9 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { lottoFormSchema, type LottoFormSchema } from '@/schemas/lotto'
-import { useConfigStore } from '@/stores/config'
+import { useFormStore } from '@/stores/form'
 import { useLotto } from '@/hooks/use-lotto'
+import { Controller } from '@/components/controller'
 import { LottoForm } from '@/components/lotto-form'
-import { Button } from './ui/button'
 
 const formNameMap = {
   0: 'A',
@@ -15,30 +13,9 @@ const formNameMap = {
   4: 'E',
 }
 
-// 로또 폼의 초기 상태를 담을 배열
-const initialForms: LottoFormSchema[] = Array.from({ length: 5 }, () => ({
-  isEnabled: true,
-  numbers: [],
-}))
-
 export function LottoTicketsForm() {
-  const { isAutoRunning } = useConfigStore()
-
-  const [formData, setFormData] = useState<LottoFormSchema[]>(initialForms)
-  const validForms = useMemo(
-    () => formData.filter((form) => lottoFormSchema.safeParse(form).success),
-    [formData]
-  )
-
-  const { onSubmit, isSubmitDisabled, cost } = useLotto(validForms)
-
-  const handleFormChange = (index: number, newFormData: LottoFormSchema) => {
-    setFormData((prev) => {
-      const newForms = [...prev]
-      newForms[index] = newFormData
-      return newForms
-    })
-  }
+  const { formData, updateForm } = useFormStore()
+  const { cost } = useLotto()
 
   return (
     <div className='flex flex-col items-center space-y-4'>
@@ -47,18 +24,13 @@ export function LottoTicketsForm() {
           <LottoForm
             formName={formNameMap[index as keyof typeof formNameMap]}
             key={index}
-            onFormChange={(newData) => handleFormChange(index, newData)}
+            onFormChange={(newData) => updateForm(index, newData)}
           />
         ))}
       </div>
       <div>금액: {cost.toLocaleString()}원</div>
-      <Button
-        size={'lg'}
-        onClick={onSubmit}
-        disabled={isSubmitDisabled || isAutoRunning}
-      >
-        {isAutoRunning ? '자동 구매 진행 중...' : '구매하기'}
-      </Button>
+
+      <Controller />
     </div>
   )
 }
