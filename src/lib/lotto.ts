@@ -17,10 +17,12 @@ export function generateLottoNumbers({
     }
   }
 
+  const bonusNumber = isContainBonusNumber ? numbers.pop() : null
+  
   // 오름차순으로 정렬
   numbers.sort((a, b) => a - b)
 
-  return numbers
+  return bonusNumber ? [...numbers, bonusNumber] : numbers
 }
 
 /**
