@@ -1,7 +1,7 @@
 import { type LottoFormSchema, type LottoSchema } from '@/schemas/lotto'
 import { type NumberStatsMap } from '@/types/lotto'
+import { toast } from 'sonner'
 import { create } from 'zustand'
-import { useConfigStore } from './config'
 import {
   checkLottoResult,
   generateLottoNumbers,
@@ -11,10 +11,16 @@ import {
   updateNumberStats,
   updateWinningNumberStats,
 } from '@/lib/lotto-submission'
+import { CustomToaster } from '@/components/custom-toaster'
+import { FancyToaster } from '@/components/fancy-toaster'
+import { useConfigStore } from './config'
 
 type Tickets = LottoSchema[]
 
 interface ResultState {
+  isFifthRankToastShown: boolean
+  setFifthRankToastShown: (shown: boolean) => void
+
   // 사용한 돈, 제출된 티켓
   usedMoney: number
   setUsedMoney: (money: number) => void
@@ -52,9 +58,12 @@ interface ResultState {
 }
 
 export const useResultStore = create<ResultState>((set, get) => ({
+  isFifthRankToastShown: false,
+  setFifthRankToastShown: (shown) => set({ isFifthRankToastShown: shown }),
   usedMoney: 0,
   setUsedMoney: (money) => set({ usedMoney: money }),
-  addUsedMoney: (money) => set((state) => ({ usedMoney: state.usedMoney + money })),
+  addUsedMoney: (money) =>
+    set((state) => ({ usedMoney: state.usedMoney + money })),
   submittedCount: 0,
   setSubmittedCount: (count) => set({ submittedCount: count }),
   addSubmittedCount: (count) =>
@@ -89,6 +98,8 @@ export const useResultStore = create<ResultState>((set, get) => ({
       setWinningNumbers,
       addTotalPrize,
       setNumberStatsMap,
+      isFifthRankToastShown,
+      setFifthRankToastShown,
     } = get()
     const { prizeMap } = useConfigStore.getState()
     const cost = validForms.length * 1000
@@ -104,10 +115,34 @@ export const useResultStore = create<ResultState>((set, get) => ({
 
     const prizes = normalizedForms.reduce((acc, form) => {
       const result = checkLottoResult(form, winningNumbers)
+      const prize = prizeMap[result.rank as keyof typeof prizeMap] || 0
+      if (result.rank !== 0) {
+        switch (result.rank) {
+          case 1:
+          case 2:
+          case 3:
+            toast.custom(() => (
+              <FancyToaster rank={result.rank} prize={prize} />
+            ))
+            break
+          case 4:
+            toast.custom(() => (
+              <CustomToaster rank={result.rank} prize={prize} />
+            ))
+            break
+          case 5:
+            if (!isFifthRankToastShown) {
+              toast.custom(() => (
+                <CustomToaster rank={result.rank} prize={prize} />
+              ))
+              setFifthRankToastShown(true)
+            }
+            break
+        }
+      }
       setNumberStatsMap((currentStatsMap) =>
         updateNumberStats(currentStatsMap, form, result.matchedNumbers)
       )
-      const prize = prizeMap[result.rank as keyof typeof prizeMap] || 0
       return acc + prize
     }, 0)
     setNumberStatsMap((currentStats) =>
@@ -125,5 +160,6 @@ export const useResultStore = create<ResultState>((set, get) => ({
       winningRankCounts: {},
       totalPrize: 0,
       numberStatsMap: {},
+      isFifthRankToastShown: false,
     }),
 }))
