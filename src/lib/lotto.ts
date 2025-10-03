@@ -82,6 +82,10 @@ export function checkLottoResult(
 
   const bonusNumber = winningNumbers[6]
   const hasBonus = userSet.has(bonusNumber)
+  if (hasBonus) {
+    matchCount++
+    matchedNumbers.push(bonusNumber)
+  }
 
   switch (matchCount) {
     case 6:

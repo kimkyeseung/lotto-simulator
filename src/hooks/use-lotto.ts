@@ -14,7 +14,6 @@ const updateNumberStats = (
   submittedNumbers: number[],
   matchedNumbers: number[]
 ) => {
-  // 깊은 복사 대신, 필요한 키만 업데이트하는 방식 사용
   const newStats = { ...currentStatsMap }
 
   // 통계 업데이트를 처리하는 헬퍼 함수
@@ -27,7 +26,6 @@ const updateNumberStats = (
 
   submittedNumbers.forEach((num) => updateStat(num, 'submittedCount'))
   matchedNumbers.forEach((num) => updateStat(num, 'hitCount'))
-  // winningNumbers.forEach((num) => updateStat(num, 'resultCount'))
 
   return newStats
 }
