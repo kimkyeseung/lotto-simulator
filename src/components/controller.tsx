@@ -16,7 +16,7 @@ export function Controller() {
         onClick={onSubmit}
         disabled={isSubmitDisabled || isAutoRunning}
       >
-        {isAutoRunning ? '자동 구매 진행 중...' : '구매하기'}
+        {isAutoRunning ? '자동 구매 진행 중...' : '1회 구매하기'}
       </Button>
       <Button size={'icon'} onClick={initialize}>
         <RefreshCw className='size-4' />

@@ -28,12 +28,21 @@ export function useLotto() {
   }, [isSubmitDisabled, submitLotto, validForms])
 
   useEffect(() => {
-    if (isAutoRunning) {
-      const interval = setInterval(() => {
-        onSubmit()
-      }, 100)
+    if (!isAutoRunning) return
 
-      return () => clearInterval(interval)
+    let timeoutId: number // ID를 저장할 변수
+
+    const runSimulation = () => {
+      onSubmit()
+      // 현재 작업이 완료된 후, 다음 작업을 예약
+      timeoutId = window.setTimeout(runSimulation, 100)
+    }
+
+    runSimulation()
+
+    // 클린업 함수: 타이머 해제
+    return () => {
+      window.clearTimeout(timeoutId)
     }
   }, [isAutoRunning, onSubmit])
 
