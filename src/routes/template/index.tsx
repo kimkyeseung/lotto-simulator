@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { useConfigStore } from '@/stores/config'
 import { Button } from '@/components/ui/button'
 import { ConfigDrawer } from '@/components/config-drawer'
+import { CustomToaster } from '@/components/custom-toaster'
 import { FancyToaster } from '@/components/fancy-toaster'
 import { Header } from '@/components/layout/header'
 import { TopNav } from '@/components/layout/top-nav'
@@ -71,7 +72,13 @@ function TemplateIndex() {
           {ranks.map(({ rank, prize }) => (
             <Button
               onClick={() => {
-                toast.custom(() => <FancyToaster rank={rank} prize={prize} />)
+                if ([1, 2, 3].includes(rank)) {
+                  toast.custom(() => <FancyToaster rank={rank} prize={prize} />)
+                } else {
+                  toast.custom(() => (
+                    <CustomToaster rank={rank} prize={prize} />
+                  ))
+                }
               }}
             >
               {rank}등
