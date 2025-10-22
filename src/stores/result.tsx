@@ -122,18 +122,33 @@ export const useResultStore = create<ResultState>((set, get) => ({
           case 2:
           case 3:
             toast.custom(() => (
-              <FancyToaster rank={result.rank} prize={prize} />
+              <FancyToaster
+                rank={result.rank}
+                prize={prize}
+                numbers={form}
+                winningNumbers={winningNumbers}
+              />
             ))
             break
           case 4:
             toast.custom(() => (
-              <CustomToaster rank={result.rank} prize={prize} />
+              <CustomToaster
+                rank={result.rank}
+                prize={prize}
+                numbers={form}
+                winningNumbers={winningNumbers}
+              />
             ))
             break
           case 5:
             if (!isFifthRankToastShown) {
               toast.custom(() => (
-                <CustomToaster rank={result.rank} prize={prize} />
+                <CustomToaster
+                  rank={result.rank}
+                  prize={prize}
+                  numbers={form}
+                  winningNumbers={winningNumbers}
+                />
               ))
               setFifthRankToastShown(true)
             }
