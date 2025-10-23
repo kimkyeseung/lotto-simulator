@@ -7,6 +7,7 @@ import {
 } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Main } from '@/components/layout/main'
+import { KakaoAd } from '@/components/kakao-ad'
 import { Charts } from './charts'
 import { Lotto } from './lotto'
 import { LottoResult } from './lotto-result'
@@ -15,6 +16,10 @@ import { RecentSales } from './recent-sales'
 import { Statistics } from './statistics'
 
 export function Dashboard() {
+  const kakaoAdUnit = import.meta.env.VITE_KAKAO_AD_UNIT
+  const kakaoAdWidth = import.meta.env.VITE_KAKAO_AD_WIDTH ?? '320'
+  const kakaoAdHeight = import.meta.env.VITE_KAKAO_AD_HEIGHT ?? '100'
+
   return (
     <Main>
       <div className='mb-2 flex items-center justify-between space-y-2'>
@@ -68,7 +73,19 @@ export function Dashboard() {
               <CardHeader>
                 <CardTitle>빈칸</CardTitle>
               </CardHeader>
-              <CardContent>{/* <Charts /> */}</CardContent>
+              <CardContent>
+                {kakaoAdUnit ? (
+                  <KakaoAd
+                    unitId={kakaoAdUnit}
+                    width={kakaoAdWidth}
+                    height={kakaoAdHeight}
+                  />
+                ) : (
+                  <p className='text-sm text-muted-foreground'>
+                    환경 변수에 Kakao 광고 정보를 입력하면 광고가 표시됩니다.
+                  </p>
+                )}
+              </CardContent>
             </Card>
           </div>
 
