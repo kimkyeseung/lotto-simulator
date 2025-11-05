@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+export const lottoFormNames = ['A', 'B', 'C', 'D', 'E'] as const
+
 // 로또 번호 배열의 기본 유효성 검사 스키마 (길이 제약 없음)
 const baseLottoSchema = z
   .array(z.number().int().min(1).max(45))
@@ -21,6 +23,7 @@ export const lottoSchema = baseLottoSchema.length(6, {
 // 로또 폼 입력을 위한 스키마 (6개 이하의 숫자를 허용)
 export const lottoFormSchema = z
   .object({
+    name: z.enum(lottoFormNames),
     isEnabled: z.boolean(),
     numbers: baseLottoSchema.max(6, {
       message: '로또 번호는 6개를 초과할 수 없습니다.',

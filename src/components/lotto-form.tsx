@@ -19,13 +19,14 @@ const numberButtonClass = (isSelected: boolean, isDisabled: boolean) =>
 
 interface LottoFormProps {
   onFormChange: (data: LottoFormSchema) => void
-  formName: string
+  formName: LottoFormSchema['name']
 }
 
 export function LottoForm({ onFormChange, formName }: LottoFormProps) {
   const form = useForm<LottoFormSchema>({
     resolver: zodResolver(lottoFormSchema),
     defaultValues: {
+      name: formName,
       isEnabled: true,
       numbers: [],
     },

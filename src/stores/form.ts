@@ -1,7 +1,12 @@
-import { type LottoFormSchema, lottoFormSchema } from '@/schemas/lotto'
+import {
+  type LottoFormSchema,
+  lottoFormNames,
+  lottoFormSchema,
+} from '@/schemas/lotto'
 import { create } from 'zustand'
 
-const initialForms: LottoFormSchema[] = Array.from({ length: 5 }, () => ({
+const initialForms: LottoFormSchema[] = lottoFormNames.map((name) => ({
+  name,
   isEnabled: true,
   numbers: [],
 }))
