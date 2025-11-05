@@ -6,8 +6,10 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Main } from '@/components/layout/main'
 import { KakaoAd } from '@/components/kakao-ad'
+import { Main } from '@/components/layout/main'
+import { LottoTicketsForm } from '@/components/lotto-ticket-form'
+import { MobileControlPanel } from '@/components/mobile-control-panel'
 import { Charts } from './charts'
 import { LottoResult } from './lotto-result'
 import { Overview } from './overview'
@@ -80,7 +82,7 @@ export function Dashboard() {
                     height={kakaoAdHeight}
                   />
                 ) : (
-                  <p className='text-sm text-muted-foreground'>
+                  <p className='text-muted-foreground text-sm'>
                     환경 변수에 Kakao 광고 정보를 입력하면 광고가 표시됩니다.
                   </p>
                 )}
@@ -225,6 +227,7 @@ export function Dashboard() {
           </div>
         </TabsContent>
       </Tabs>
+      <MobileControlPanel />
     </Main>
   )
 }

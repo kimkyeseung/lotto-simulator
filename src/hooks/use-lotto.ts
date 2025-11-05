@@ -47,6 +47,7 @@ export function useLotto() {
   }, [isAutoRunning, onSubmit])
 
   return {
+    validForms,
     onSubmit,
     isSubmitDisabled,
     cost,
