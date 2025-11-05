@@ -1,10 +1,11 @@
+import { type LottoFormSchema } from '@/schemas/lotto'
 import { useResultStore } from '@/stores/result'
 import { checkLottoResult } from '@/lib/lotto'
 import { Card, CardContent } from '@/components/ui/card'
 import { NumberBall } from '@/components/ui/number-ball'
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
 
-const formNameMap = {
+const formNameMap: Record<number, LottoFormSchema['name']> = {
   0: 'A',
   1: 'B',
   2: 'C',
