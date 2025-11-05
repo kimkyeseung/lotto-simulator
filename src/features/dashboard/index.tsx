@@ -5,11 +5,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { useSidebar } from '@/components/ui/sidebar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { KakaoAd } from '@/components/kakao-ad'
 import { Main } from '@/components/layout/main'
 import { LottoTicketsForm } from '@/components/lotto-ticket-form'
 import { MobileControlPanel } from '@/components/mobile-control-panel'
+import { MobileLottoSlipCarousel } from '@/components/mobile-lotto-slip-carousel'
 import { Charts } from './charts'
 import { LottoResult } from './lotto-result'
 import { Overview } from './overview'
@@ -17,6 +19,7 @@ import { RecentSales } from './recent-sales'
 import { Statistics } from './statistics'
 
 export function Dashboard() {
+  const { isMobile } = useSidebar()
   const kakaoAdUnit = import.meta.env.VITE_KAKAO_AD_UNIT
   const kakaoAdWidth = import.meta.env.VITE_KAKAO_AD_WIDTH ?? '320'
   const kakaoAdHeight = import.meta.env.VITE_KAKAO_AD_HEIGHT ?? '100'
@@ -45,7 +48,7 @@ export function Dashboard() {
               <CardTitle>로또 구매하기 (5줄)</CardTitle>
             </CardHeader>
             <CardContent>
-              <LottoTicketsForm />
+              {isMobile ? <MobileLottoSlipCarousel /> : <LottoTicketsForm />}
             </CardContent>
           </Card>
 
@@ -227,7 +230,7 @@ export function Dashboard() {
           </div>
         </TabsContent>
       </Tabs>
-      <MobileControlPanel />
+      {isMobile && <MobileControlPanel />}
     </Main>
   )
 }
