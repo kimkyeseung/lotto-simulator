@@ -12,6 +12,7 @@ import { Main } from '@/components/layout/main'
 import { LottoTicketsForm } from '@/components/lotto-ticket-form'
 import { MobileControlPanel } from '@/components/mobile-control-panel'
 import { MobileLottoSlipCarousel } from '@/components/mobile-lotto-slip-carousel'
+import { MobileKakaoAd } from '@/components/mobile-kakao-ad'
 import { Charts } from './charts'
 import { LottoResult } from './lotto-result'
 import { Overview } from './overview'
@@ -25,7 +26,8 @@ export function Dashboard() {
   const kakaoAdHeight = import.meta.env.VITE_KAKAO_AD_HEIGHT ?? '100'
 
   return (
-    <Main>
+    <Main className={isMobile ? 'mt-[120px]' : undefined}>
+      {isMobile && <MobileKakaoAd />}
       <div className='mb-2 flex items-center justify-between space-y-2'>
         <h1 className='text-2xl font-bold tracking-tight'>Dashboard</h1>
       </div>
@@ -73,24 +75,26 @@ export function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className='lg:col-span-5'>
-              <CardHeader>
-                <CardTitle>빈칸</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {kakaoAdUnit ? (
-                  <KakaoAd
-                    unitId={kakaoAdUnit}
-                    width={kakaoAdWidth}
-                    height={kakaoAdHeight}
-                  />
-                ) : (
-                  <p className='text-muted-foreground text-sm'>
-                    환경 변수에 Kakao 광고 정보를 입력하면 광고가 표시됩니다.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+            {!isMobile && (
+              <Card className='lg:col-span-5'>
+                <CardHeader>
+                  <CardTitle>빈칸</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {kakaoAdUnit ? (
+                    <KakaoAd
+                      unitId={kakaoAdUnit}
+                      width={kakaoAdWidth}
+                      height={kakaoAdHeight}
+                    />
+                  ) : (
+                    <p className='text-muted-foreground text-sm'>
+                      환경 변수에 Kakao 광고 정보를 입력하면 광고가 표시됩니다.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           <Card>
