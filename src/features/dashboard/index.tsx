@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Main } from '@/components/layout/main'
 import { KakaoAd } from '@/components/kakao-ad'
 import { Charts } from './charts'
-import { Lotto } from './lotto'
 import { LottoResult } from './lotto-result'
 import { Overview } from './overview'
 import { RecentSales } from './recent-sales'
@@ -44,7 +43,7 @@ export function Dashboard() {
               <CardTitle>로또 구매하기 (5줄)</CardTitle>
             </CardHeader>
             <CardContent>
-              <Lotto />
+              <LottoTicketsForm />
             </CardContent>
           </Card>
 
