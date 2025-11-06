@@ -4,11 +4,9 @@ export function Statistics() {
   const { usedMoney, totalPrize, submittedCount, winningRankCounts } =
     useResultStore()
   const prizeRanks = [1, 2, 3, 4, 5] as const
-  const profitRate =
-    usedMoney === 0
-      ? '0.00'
-      : ((totalPrize / usedMoney) * 100).toFixed(2)
-  const profitRateValue = Number(profitRate)
+  const profitRateValue =
+    usedMoney === 0 ? 0 : ((totalPrize - usedMoney) / usedMoney) * 100
+  const profitRate = profitRateValue.toFixed(2)
   const profitColor =
     profitRateValue >= 0 ? 'text-emerald-500' : 'text-destructive'
   return (
