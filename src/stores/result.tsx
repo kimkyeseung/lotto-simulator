@@ -17,6 +17,16 @@ import { useConfigStore } from './config'
 
 type Tickets = LottoSchema[]
 
+export type SimulationSnapshot = {
+  id: number
+  timestamp: number
+  submittedCount: number
+  usedMoney: number
+  totalPrize: number
+  netProfit: number
+  profitRate: number
+}
+
 const TRACKED_RANKS: WinningRank[] = [1, 2, 3, 4, 5, 0]
 
 const createInitialWinningRankCounts = (): Record<WinningRank, number> => ({
@@ -27,6 +37,8 @@ const createInitialWinningRankCounts = (): Record<WinningRank, number> => ({
   4: 0,
   5: 0,
 })
+
+const MAX_HISTORY_LENGTH = 200
 
 interface ResultState {
   isFifthRankToastShown: boolean
@@ -63,6 +75,14 @@ interface ResultState {
   numberStatsMap: NumberStatsMap
   setNumberStatsMap: (
     updater: NumberStatsMap | ((currentStats: NumberStatsMap) => NumberStatsMap)
+  ) => void
+
+  // 진행 기록
+  history: SimulationSnapshot[]
+  setHistory: (
+    updater:
+      | SimulationSnapshot[]
+      | ((history: SimulationSnapshot[]) => SimulationSnapshot[])
   ) => void
 
   // 실행 함수
@@ -110,6 +130,14 @@ export const useResultStore = create<ResultState>((set, get) => ({
       return { numberStatsMap: updater }
     })
   },
+  history: [],
+  setHistory: (updater) =>
+    set((state) => {
+      if (typeof updater === 'function') {
+        return { history: updater(state.history) }
+      }
+      return { history: updater }
+    }),
   submitLotto: (validForms: LottoFormSchema[]) => {
     if (validForms.length === 0) return
 
@@ -123,6 +151,7 @@ export const useResultStore = create<ResultState>((set, get) => ({
       isFifthRankToastShown,
       setFifthRankToastShown,
       setWinningRankCounts,
+      setHistory,
     } = get()
     const { prizeMap } = useConfigStore.getState()
     const cost = validForms.length * 1000
@@ -202,6 +231,38 @@ export const useResultStore = create<ResultState>((set, get) => ({
     })
 
     addTotalPrize(prizes)
+
+    const {
+      usedMoney: updatedUsedMoney,
+      totalPrize: updatedTotalPrize,
+      submittedCount: updatedSubmittedCount,
+    } = get()
+
+    setHistory((currentHistory) => {
+      const netProfit = updatedTotalPrize - updatedUsedMoney
+      const profitRate =
+        updatedUsedMoney === 0
+          ? 0
+          : ((updatedTotalPrize - updatedUsedMoney) / updatedUsedMoney) * 100
+
+      const lastSnapshot = currentHistory[currentHistory.length - 1]
+
+      const nextSnapshot: SimulationSnapshot = {
+        id: (lastSnapshot?.id ?? 0) + 1,
+        timestamp: Date.now(),
+        submittedCount: updatedSubmittedCount,
+        usedMoney: updatedUsedMoney,
+        totalPrize: updatedTotalPrize,
+        netProfit,
+        profitRate,
+      }
+
+      const nextHistory = [...currentHistory, nextSnapshot]
+      if (nextHistory.length > MAX_HISTORY_LENGTH) {
+        return nextHistory.slice(nextHistory.length - MAX_HISTORY_LENGTH)
+      }
+      return nextHistory
+    })
   },
   initialize: () =>
     set({
@@ -212,6 +273,7 @@ export const useResultStore = create<ResultState>((set, get) => ({
       winningRankCounts: createInitialWinningRankCounts(),
       totalPrize: 0,
       numberStatsMap: {},
+      history: [],
       isFifthRankToastShown: false,
     }),
 }))

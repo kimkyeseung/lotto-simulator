@@ -4,13 +4,19 @@ import { useConfigStore } from '@/stores/config'
 import { selectValidForms, useFormStore } from '@/stores/form'
 import { useResultStore } from '@/stores/result'
 
-export function useLotto() {
+type UseLottoOptions = {
+  enableAutoRunner?: boolean
+}
+
+export function useLotto(options?: UseLottoOptions) {
   const { isAutoRunning } = useConfigStore()
   const { submitLotto, usedMoney, totalPrize } = useResultStore()
 
   const validForms = useFormStore(
     useShallow((state) => selectValidForms(state))
   )
+
+  const enableAutoRunner = options?.enableAutoRunner ?? false
 
   const isSubmitDisabled = useMemo(() => validForms.length === 0, [validForms])
   const cost = useMemo(() => validForms.length * 1000, [validForms])
@@ -28,6 +34,7 @@ export function useLotto() {
   }, [isSubmitDisabled, submitLotto, validForms])
 
   useEffect(() => {
+    if (!enableAutoRunner) return
     if (!isAutoRunning) return
 
     let timeoutId: number // ID를 저장할 변수
@@ -44,7 +51,7 @@ export function useLotto() {
     return () => {
       window.clearTimeout(timeoutId)
     }
-  }, [isAutoRunning, onSubmit])
+  }, [enableAutoRunner, isAutoRunning, onSubmit])
 
   return {
     validForms,

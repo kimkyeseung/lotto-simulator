@@ -17,7 +17,10 @@ import { LottoTicketsForm } from '@/components/lotto-ticket-form'
 import { MobileControlPanel } from '@/components/mobile-control-panel'
 import { MobileKakaoAd } from '@/components/mobile-kakao-ad'
 import { MobileLottoSlipCarousel } from '@/components/mobile-lotto-slip-carousel'
+import { ProfileDropdown } from '@/components/profile-dropdown'
 import { ThemeSwitch } from '@/components/theme-switch'
+import { DashboardAnalytics } from './analytics'
+import { AutoPurchaseRunner } from './auto-purchase-runner'
 import { Charts } from './charts'
 import { LottoResult } from './lotto-result'
 import { Overview } from './overview'
@@ -43,6 +46,7 @@ export function Dashboard() {
 
   return (
     <>
+      <AutoPurchaseRunner />
       {isMobile && <MobileKakaoAd />}
       <Header
         fixed
@@ -88,6 +92,7 @@ export function Dashboard() {
               </div>
             </div>
             <ThemeSwitch />
+            <ProfileDropdown />
           </div>
         </div>
       </Header>
@@ -171,6 +176,10 @@ export function Dashboard() {
           </TabsContent>
 
           <TabsContent value='analytics' className='space-y-4'>
+            <DashboardAnalytics />
+          </TabsContent>
+
+          <TabsContent value='reports' className='space-y-4'>
             <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
               <Card>
                 <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
