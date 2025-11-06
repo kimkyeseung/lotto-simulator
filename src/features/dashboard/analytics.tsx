@@ -10,8 +10,8 @@ import {
   BarChart,
   Bar,
 } from 'recharts'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useResultStore } from '@/stores/result'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 const currencyFormatter = (value: number) =>
   `${value >= 0 ? '' : '-'}${Math.abs(value).toLocaleString()}`
@@ -65,10 +65,7 @@ function RealtimeProgress() {
                   if (item?.dataKey === 'profitRate') {
                     return [`${(value as number).toFixed(2)}%`, '수익률']
                   }
-                  return [
-                    `${currencyFormatter(value as number)} 원`,
-                    '순이익',
-                  ]
+                  return [`${currencyFormatter(value as number)} 원`, '순이익']
                 }}
               />
               <Line
@@ -130,7 +127,7 @@ function RevenueSummary() {
       </CardHeader>
       <CardContent className='space-y-4'>
         <div>
-          <p className='text-sm text-muted-foreground'>순이익</p>
+          <p className='text-muted-foreground text-sm'>순이익</p>
           <p
             className={`text-2xl font-semibold ${
               netProfit >= 0 ? 'text-emerald-500' : 'text-destructive'
@@ -148,7 +145,7 @@ function RevenueSummary() {
         </div>
 
         <div>
-          <p className='text-sm text-muted-foreground'>수익률</p>
+          <p className='text-muted-foreground text-sm'>수익률</p>
           <p
             className={`text-xl font-semibold ${
               profitRate >= 0 ? 'text-emerald-500' : 'text-destructive'
@@ -211,7 +208,9 @@ function RankDistributionChart() {
               <XAxis dataKey='label' />
               <YAxis tickFormatter={(value) => `${value}`} />
               <Tooltip
-                formatter={(value) => `${(value as number).toLocaleString()} 회`}
+                formatter={(value) =>
+                  `${(value as number).toLocaleString()} 회`
+                }
               />
               <Bar
                 dataKey='count'
@@ -231,38 +230,75 @@ function RankDistributionChart() {
   )
 }
 
-function NumberFrequencyHeatmap() {
+type HeatmapPalette = {
+  zero: string
+  low: string
+  medium: string
+  mediumHigh: string
+  high: string
+}
+
+const frequencyPalette: HeatmapPalette = {
+  zero: 'bg-muted text-muted-foreground',
+  low: 'bg-emerald-50 text-emerald-900',
+  medium: 'bg-emerald-200 text-emerald-900',
+  mediumHigh: 'bg-emerald-300 text-white',
+  high: 'bg-emerald-600 text-white',
+}
+
+const hitPalette: HeatmapPalette = {
+  zero: 'bg-muted text-muted-foreground',
+  low: 'bg-blue-200 text-blue-900',
+  medium: 'bg-blue-400 text-blue-950',
+  mediumHigh: 'bg-blue-500 text-white',
+  high: 'bg-blue-600 text-white',
+}
+
+const getIntensityClass = (count: number, maxCount: number, palette: HeatmapPalette) => {
+  if (maxCount === 0) return palette.zero
+  const ratio = count / maxCount
+  if (ratio > 0.75) return palette.high
+  if (ratio > 0.5) return palette.mediumHigh
+  if (ratio > 0.25) return palette.medium
+  if (ratio > 0) return palette.low
+  return palette.zero
+}
+
+function useNumberHeatmapStats() {
   const numberStatsMap = useResultStore((state) => state.numberStatsMap)
 
-  const { maxCount, stats } = useMemo(() => {
-    let max = 0
-    const numbers = Array.from({ length: 45 }, (_, index) => {
+  return useMemo(() => {
+    let maxSubmittedCount = 0
+    let maxHitCount = 0
+
+    const stats = Array.from({ length: 45 }, (_, index) => {
       const number = index + 1
       const statsForNumber = numberStatsMap[number]
-      const count = statsForNumber?.submittedCount ?? 0
-      if (count > max) {
-        max = count
+      const submittedCount = statsForNumber?.submittedCount ?? 0
+      const hitCount = statsForNumber?.hitCount ?? 0
+      const resultCount = statsForNumber?.resultCount ?? 0
+
+      if (submittedCount > maxSubmittedCount) {
+        maxSubmittedCount = submittedCount
       }
+      if (hitCount > maxHitCount) {
+        maxHitCount = hitCount
+      }
+
       return {
         number,
-        submittedCount: count,
-        hitCount: statsForNumber?.hitCount ?? 0,
-        resultCount: statsForNumber?.resultCount ?? 0,
+        submittedCount,
+        hitCount,
+        resultCount,
       }
     })
 
-    return { maxCount: max, stats: numbers }
+    return { stats, maxSubmittedCount, maxHitCount }
   }, [numberStatsMap])
+}
 
-  const getIntensityClass = (count: number) => {
-    if (maxCount === 0) return 'bg-muted'
-    const ratio = count / maxCount
-    if (ratio > 0.75) return 'bg-emerald-500 text-white'
-    if (ratio > 0.5) return 'bg-emerald-400 text-white'
-    if (ratio > 0.25) return 'bg-emerald-300 text-emerald-900'
-    if (ratio > 0) return 'bg-emerald-200 text-emerald-900'
-    return 'bg-muted text-muted-foreground'
-  }
+function NumberFrequencyHeatmap() {
+  const { stats, maxSubmittedCount } = useNumberHeatmapStats()
 
   return (
     <Card className='h-full'>
@@ -274,7 +310,7 @@ function NumberFrequencyHeatmap() {
           {stats.map((item) => (
             <div
               key={item.number}
-              className={`flex aspect-square flex-col items-center justify-center rounded-md p-1 ${getIntensityClass(item.submittedCount)}`}
+              className={`flex aspect-square flex-col items-center justify-center rounded-md p-1 ${getIntensityClass(item.submittedCount, maxSubmittedCount, frequencyPalette)}`}
             >
               <span className='font-semibold'>{item.number}</span>
               <span>{item.submittedCount}</span>
@@ -290,6 +326,35 @@ function NumberFrequencyHeatmap() {
   )
 }
 
+function NumberHitFrequencyHeatmap() {
+  const { stats, maxHitCount } = useNumberHeatmapStats()
+
+  return (
+    <Card className='h-full'>
+      <CardHeader>
+        <CardTitle>번호별 적중 빈도 히트맵</CardTitle>
+      </CardHeader>
+      <CardContent className='space-y-3'>
+        <div className='grid grid-cols-9 gap-2 text-xs'>
+          {stats.map((item) => (
+            <div
+              key={item.number}
+              className={`flex aspect-square flex-col items-center justify-center rounded-md p-1 ${getIntensityClass(item.hitCount, maxHitCount, hitPalette)}`}
+            >
+              <span className='font-semibold'>{item.number}</span>
+              <span>{item.hitCount}</span>
+            </div>
+          ))}
+        </div>
+        <p className='text-muted-foreground text-xs'>
+          추첨 결과에서 적중한 횟수를 기준으로 색상을 표시합니다. 진할수록 더
+          자주 당첨된 숫자입니다.
+        </p>
+      </CardContent>
+    </Card>
+  )
+}
+
 export function DashboardAnalytics() {
   return (
     <div className='space-y-4'>
@@ -299,9 +364,10 @@ export function DashboardAnalytics() {
         </div>
         <RevenueSummary />
       </div>
-      <div className='grid gap-4 lg:grid-cols-2'>
+      <div className='grid grid-cols-1 gap-4 lg:grid-cols-[0.8fr_1fr_1fr]'>
         <RankDistributionChart />
         <NumberFrequencyHeatmap />
+        <NumberHitFrequencyHeatmap />
       </div>
     </div>
   )
