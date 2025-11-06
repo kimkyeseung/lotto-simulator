@@ -17,7 +17,6 @@ import { LottoTicketsForm } from '@/components/lotto-ticket-form'
 import { MobileControlPanel } from '@/components/mobile-control-panel'
 import { MobileKakaoAd } from '@/components/mobile-kakao-ad'
 import { MobileLottoSlipCarousel } from '@/components/mobile-lotto-slip-carousel'
-import { ProfileDropdown } from '@/components/profile-dropdown'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { DashboardAnalytics } from './analytics'
 import { AutoPurchaseRunner } from './auto-purchase-runner'
@@ -61,7 +60,7 @@ export function Dashboard() {
               Lotto Simulator
             </p>
             <h1 className='text-lg leading-tight font-semibold'>
-              로또 시뮬레이터 대시보드
+              로또 시뮬레이터
             </h1>
           </div>
           <div className='ms-auto flex items-center gap-3'>
@@ -92,7 +91,6 @@ export function Dashboard() {
               </div>
             </div>
             <ThemeSwitch />
-            <ProfileDropdown />
           </div>
         </div>
       </Header>
