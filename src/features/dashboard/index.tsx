@@ -29,9 +29,7 @@ import { Statistics } from './statistics'
 export function Dashboard() {
   const { isMobile } = useSidebar()
   const { usedMoney, totalPrize, submittedCount } = useResultStore()
-  const kakaoAdUnit = import.meta.env.VITE_KAKAO_AD_UNIT
-  const kakaoAdWidth = import.meta.env.VITE_KAKAO_AD_WIDTH ?? '320'
-  const kakaoAdHeight = import.meta.env.VITE_KAKAO_AD_HEIGHT ?? '100'
+  const kakaoAdUnit = import.meta.env.VITE_KAKAO_AD_UNIT_2
   const netProfit = totalPrize - usedMoney
   const profitRate =
     usedMoney === 0 ? 0 : ((totalPrize - usedMoney) / usedMoney) * 100
@@ -141,24 +139,14 @@ export function Dashboard() {
               </Card>
 
               {!isMobile && (
-                <Card className='lg:col-span-5'>
-                  <CardHeader>
-                    <CardTitle>빈칸</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {kakaoAdUnit ? (
-                      <KakaoAd
-                        unitId={kakaoAdUnit}
-                        width={kakaoAdWidth}
-                        height={kakaoAdHeight}
-                      />
-                    ) : (
-                      <p className='text-muted-foreground text-sm'>
-                        환경 변수에 Kakao 광고 정보를 입력하면 광고가
-                        표시됩니다.
-                      </p>
-                    )}
-                  </CardContent>
+                <Card className='overflow-hidden p-0 lg:col-span-5'>
+                  {kakaoAdUnit ? (
+                    <KakaoAd unitId={kakaoAdUnit} width={350} height={250} />
+                  ) : (
+                    <p className='text-muted-foreground text-sm'>
+                      환경 변수에 Kakao 광고 정보를 입력하면 광고가 표시됩니다.
+                    </p>
+                  )}
                 </Card>
               )}
             </div>
