@@ -1,5 +1,5 @@
 import { type LottoFormSchema, type LottoSchema } from '@/schemas/lotto'
-import { type NumberStatsMap } from '@/types/lotto'
+import { type NumberStatsMap, type WinningRank } from '@/types/lotto'
 import { toast } from 'sonner'
 import { create } from 'zustand'
 import {
@@ -16,6 +16,17 @@ import { FancyToaster } from '@/components/fancy-toaster'
 import { useConfigStore } from './config'
 
 type Tickets = LottoSchema[]
+
+const TRACKED_RANKS: WinningRank[] = [1, 2, 3, 4, 5, 0]
+
+const createInitialWinningRankCounts = (): Record<WinningRank, number> => ({
+  0: 0,
+  1: 0,
+  2: 0,
+  3: 0,
+  4: 0,
+  5: 0,
+})
 
 interface ResultState {
   isFifthRankToastShown: boolean
@@ -36,8 +47,12 @@ interface ResultState {
   // 당첨 결과
   winningNumbers: LottoSchema | null
   setWinningNumbers: (numbers: LottoSchema | null) => void
-  winningRankCounts: Record<string, number>
-  setWinningRankCounts: (counts: Record<string, number>) => void
+  winningRankCounts: Record<WinningRank, number>
+  setWinningRankCounts: (
+    updater:
+      | Record<WinningRank, number>
+      | ((counts: Record<WinningRank, number>) => Record<WinningRank, number>)
+  ) => void
 
   // 당첨금
   totalPrize: number
@@ -72,8 +87,15 @@ export const useResultStore = create<ResultState>((set, get) => ({
   setSubmittedTickets: (tickets) => set({ submittedTickets: tickets }),
   winningNumbers: null,
   setWinningNumbers: (numbers) => set({ winningNumbers: numbers }),
-  winningRankCounts: {},
-  setWinningRankCounts: (counts) => set({ winningRankCounts: counts }),
+  winningRankCounts: createInitialWinningRankCounts(),
+  setWinningRankCounts: (updater) =>
+    set((state) => {
+      if (typeof updater === 'function') {
+        const nextCounts = updater(state.winningRankCounts)
+        return { winningRankCounts: nextCounts }
+      }
+      return { winningRankCounts: updater }
+    }),
   totalPrize: 0,
   setTotalPrize: (amount) => set({ totalPrize: amount }),
   addTotalPrize: (amount) =>
@@ -100,6 +122,7 @@ export const useResultStore = create<ResultState>((set, get) => ({
       setNumberStatsMap,
       isFifthRankToastShown,
       setFifthRankToastShown,
+      setWinningRankCounts,
     } = get()
     const { prizeMap } = useConfigStore.getState()
     const cost = validForms.length * 1000
@@ -112,6 +135,8 @@ export const useResultStore = create<ResultState>((set, get) => ({
     setSubmittedTickets(normalizedForms)
     const winningNumbers = generateLottoNumbers({ isContainBonusNumber: true })
     setWinningNumbers(winningNumbers)
+
+    const submissionRankCounts = createInitialWinningRankCounts()
 
     const prizes = normalizedForms.reduce((acc, form) => {
       const result = checkLottoResult(form, winningNumbers)
@@ -155,6 +180,8 @@ export const useResultStore = create<ResultState>((set, get) => ({
             break
         }
       }
+      submissionRankCounts[result.rank] =
+        (submissionRankCounts[result.rank] ?? 0) + 1
       setNumberStatsMap((currentStatsMap) =>
         updateNumberStats(currentStatsMap, form, result.matchedNumbers)
       )
@@ -164,6 +191,16 @@ export const useResultStore = create<ResultState>((set, get) => ({
       updateWinningNumberStats(currentStats, winningNumbers)
     )
 
+    setWinningRankCounts((currentCounts) => {
+      const nextCounts = { ...currentCounts }
+      for (const rank of TRACKED_RANKS) {
+        const submissionCount = submissionRankCounts[rank] ?? 0
+        if (!submissionCount) continue
+        nextCounts[rank] = (nextCounts[rank] ?? 0) + submissionCount
+      }
+      return nextCounts
+    })
+
     addTotalPrize(prizes)
   },
   initialize: () =>
@@ -172,7 +209,7 @@ export const useResultStore = create<ResultState>((set, get) => ({
       submittedCount: 0,
       submittedTickets: [],
       winningNumbers: null,
-      winningRankCounts: {},
+      winningRankCounts: createInitialWinningRankCounts(),
       totalPrize: 0,
       numberStatsMap: {},
       isFifthRankToastShown: false,
