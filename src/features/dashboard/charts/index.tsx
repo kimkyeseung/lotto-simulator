@@ -40,9 +40,14 @@ export function Charts() {
         />
         <Tooltip content={CustomTooltip} />
         <Legend />
-        <Bar dataKey='submittedCount' fill='#8884d8' />
-        <Bar dataKey='resultCount' fill='#82ca9d' />
-        <Bar dataKey='hitCount' fill='currentColor' className='fill-primary' />
+        <Bar dataKey='submittedCount' fill='#8884d8' isAnimationActive={false} />
+        <Bar dataKey='resultCount' fill='#82ca9d' isAnimationActive={false} />
+        <Bar
+          dataKey='hitCount'
+          fill='currentColor'
+          className='fill-primary'
+          isAnimationActive={false}
+        />
       </BarChart>
     </ResponsiveContainer>
   )

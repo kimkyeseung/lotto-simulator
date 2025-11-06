@@ -79,6 +79,7 @@ function RealtimeProgress() {
                 stroke='hsl(var(--primary))'
                 strokeWidth={2}
                 dot={false}
+                isAnimationActive={false}
               />
               <Line
                 type='monotone'
@@ -88,6 +89,7 @@ function RealtimeProgress() {
                 stroke='#16a34a'
                 strokeWidth={2}
                 dot={false}
+                isAnimationActive={false}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -215,6 +217,7 @@ function RankDistributionChart() {
                 dataKey='count'
                 fill='hsl(var(--primary))'
                 radius={[8, 8, 0, 0]}
+                isAnimationActive={false}
               />
             </BarChart>
           </ResponsiveContainer>

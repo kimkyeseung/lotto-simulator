@@ -74,6 +74,7 @@ export function Overview() {
           fill='currentColor'
           radius={[4, 4, 0, 0]}
           className='fill-primary'
+          isAnimationActive={false}
         />
       </BarChart>
     </ResponsiveContainer>
