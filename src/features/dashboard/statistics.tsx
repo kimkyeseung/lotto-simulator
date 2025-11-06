@@ -4,6 +4,13 @@ export function Statistics() {
   const { usedMoney, totalPrize, submittedCount, winningRankCounts } =
     useResultStore()
   const prizeRanks = [1, 2, 3, 4, 5] as const
+  const profitRate =
+    usedMoney === 0
+      ? '0.00'
+      : ((totalPrize / usedMoney) * 100).toFixed(2)
+  const profitRateValue = Number(profitRate)
+  const profitColor =
+    profitRateValue >= 0 ? 'text-emerald-500' : 'text-destructive'
   return (
     <div className='space-y-4'>
       <div className='flex flex-1 flex-wrap items-center justify-between'>
@@ -17,6 +24,10 @@ export function Statistics() {
       <div className='flex flex-1 flex-wrap items-center justify-between'>
         <p className='text-sm leading-none font-medium'>누적 상금</p>
         <div className='font-medium'>{totalPrize.toLocaleString()} 원</div>
+      </div>
+      <div className='flex flex-1 flex-wrap items-center justify-between'>
+        <p className='text-sm leading-none font-medium'>수익률</p>
+        <div className={`font-medium ${profitColor}`}>{profitRate} %</div>
       </div>
       <div className='space-y-2'>
         <p className='text-sm leading-none font-medium'>등수별 당첨 횟수</p>
