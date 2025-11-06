@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+Disallow: /settings
+Disallow: /settings/
+Disallow: /users/
+Disallow: /tasks/
+Disallow: /apps/
+Disallow: /chats/
+Disallow: /help-center/
+Disallow: /errors/
+Disallow: /template/
+Disallow: /clerk/
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /forgot-password
+Disallow: /otp
+
+Sitemap: https://lotto-simulator-three.vercel.app/sitemap.xml

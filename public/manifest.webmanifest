@@ -1,0 +1,16 @@
+{
+  "name": "Lotto Simulator",
+  "short_name": "LottoSim",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020817",
+  "theme_color": "#0ea5e9",
+  "description": "로또 번호 시뮬레이션과 당첨 통계를 제공하는 Lotto Simulator 대시보드",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

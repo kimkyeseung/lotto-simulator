@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { buildSeo } from '@/utils/seo'
 import { ClerkProvider } from '@clerk/clerk-react'
 import { ExternalLink, Key } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -10,6 +11,13 @@ import { Main } from '@/components/layout/main'
 import { ThemeSwitch } from '@/components/theme-switch'
 
 export const Route = createFileRoute('/clerk')({
+  head: () =>
+    buildSeo({
+      title: 'Clerk 통합 데모 | Lotto Simulator',
+      description: 'Clerk 인증 연동을 테스트하기 위한 샌드박스 영역입니다.',
+      path: '/clerk',
+      noIndex: true,
+    }),
   component: RouteComponent,
 })
 

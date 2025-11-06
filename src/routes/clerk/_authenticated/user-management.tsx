@@ -19,8 +19,16 @@ import { UsersPrimaryButtons } from '@/features/users/components/users-primary-b
 import { UsersProvider } from '@/features/users/components/users-provider'
 import { UsersTable } from '@/features/users/components/users-table'
 import { users } from '@/features/users/data/users'
+import { buildSeo } from '@/utils/seo'
 
 export const Route = createFileRoute('/clerk/_authenticated/user-management')({
+  head: () =>
+    buildSeo({
+      title: 'Clerk 사용자 관리 데모 | Lotto Simulator',
+      description: 'Clerk 인증 후 접근 가능한 사용자 목록과 권한 관리를 경험해 보세요.',
+      path: '/clerk/user-management',
+      noIndex: true,
+    }),
   component: UserManagement,
 })
 

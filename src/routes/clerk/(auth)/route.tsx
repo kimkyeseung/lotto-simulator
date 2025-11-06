@@ -1,9 +1,17 @@
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
+import { buildSeo } from '@/utils/seo'
 import { ClerkFullLogo } from '@/assets/clerk-full-logo'
 import { Logo } from '@/assets/logo'
 import { LearnMore } from '@/components/learn-more'
 
 export const Route = createFileRoute('/clerk/(auth)')({
+  head: () =>
+    buildSeo({
+      title: 'Clerk 인증 페이지 | Lotto Simulator',
+      description: 'Clerk 인증 컴포넌트를 사용하는 예시 로그인 레이아웃입니다.',
+      path: '/clerk/sign-in',
+      noIndex: true,
+    }),
   component: ClerkAuthLayout,
 })
 

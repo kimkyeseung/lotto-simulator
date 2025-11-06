@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { buildSeo } from '@/utils/seo'
 import { type WinningRank } from '@/types/lotto'
 import { toast } from 'sonner'
 import { useConfigStore } from '@/stores/config'
@@ -15,6 +16,13 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 
 export const Route = createFileRoute('/template/')({
+  head: () =>
+    buildSeo({
+      title: 'UI 컴포넌트 미리보기 | Lotto Simulator',
+      description: '로또 관련 UI 컴포넌트를 확인하고 데모 동작을 테스트하는 템플릿 페이지입니다.',
+      path: '/template/',
+      noIndex: true,
+    }),
   component: TemplateIndex,
 })
 
