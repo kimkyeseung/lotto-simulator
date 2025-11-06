@@ -91,7 +91,8 @@ export function Dashboard() {
           </div>
         </div>
       </Header>
-      <Main>
+      {/* 모바일일 때 하단 컨트롤 패널 공간 확보 */}
+      <Main className={isMobile ? 'mb-24' : undefined}>
         <Tabs
           orientation='vertical'
           defaultValue='overview'
