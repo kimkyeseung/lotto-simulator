@@ -69,45 +69,39 @@ export function checkLottoResult(
     )
   }
 
-  // 사용자의 숫자와 당첨 번호(보너스 제외)를 Set으로 변환하여 효율적으로 비교
-  const winningSet = new Set(winningNumbers.slice(0, 6))
+  const mainWinningNumbers = winningNumbers.slice(0, 6)
+  const mainWinningSet = new Set(mainWinningNumbers)
   const userSet = new Set(userNumbers)
 
-  let matchCount = 0
-  const matchedNumbers: number[] = []
-  for (const num of userSet) {
-    if (winningSet.has(num)) {
-      matchCount++
-      matchedNumbers.push(num)
-    }
-  }
+  const matchedMainNumbers = Array.from(userSet)
+    .filter((num) => mainWinningSet.has(num))
+    .sort((a, b) => a - b)
 
+  const mainMatchCount = matchedMainNumbers.length
   const bonusNumber = winningNumbers[6]
   const hasBonus = userSet.has(bonusNumber)
-  if (hasBonus) {
-    matchCount++
-    matchedNumbers.push(bonusNumber)
+  const matchedNumbers = hasBonus
+    ? [...matchedMainNumbers, bonusNumber]
+    : matchedMainNumbers
+
+  if (mainMatchCount === 6) {
+    return { rank: 1, matchedNumbers, message: '1등당첨' }
   }
 
-  switch (matchCount) {
-    case 6:
-      // 1등: 일반 숫자 6개 모두 일치
-      return { rank: 1, matchedNumbers, message: '1등당첨' }
-    case 5:
-      if (hasBonus) {
-        // 2등: 일반 숫자 5개 + 보너스 번호 일치
-        return { rank: 2, matchedNumbers, message: '2등당첨' }
-      } else {
-        // 3등: 일반 숫자 5개 일치
-        return { rank: 3, matchedNumbers, message: '3등당첨' }
-      }
-    case 4:
-      // 4등: 일반 숫자 4개 일치
-      return { rank: 4, matchedNumbers, message: '4등당첨' }
-    case 3:
-      // 5등: 일반 숫자 3개 일치
-      return { rank: 5, matchedNumbers, message: '5등당첨' }
-    default:
-      return { rank: 0, matchedNumbers, message: '낙첨' }
+  if (mainMatchCount === 5) {
+    if (hasBonus) {
+      return { rank: 2, matchedNumbers, message: '2등당첨' }
+    }
+    return { rank: 3, matchedNumbers, message: '3등당첨' }
   }
+
+  if (mainMatchCount === 4) {
+    return { rank: 4, matchedNumbers, message: '4등당첨' }
+  }
+
+  if (mainMatchCount === 3) {
+    return { rank: 5, matchedNumbers, message: '5등당첨' }
+  }
+
+  return { rank: 0, matchedNumbers, message: '낙첨' }
 }
