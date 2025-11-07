@@ -1,3 +1,4 @@
+import { Suspense, lazy, useMemo, useState } from 'react'
 import { useResultStore } from '@/stores/result'
 import { cn } from '@/lib/utils'
 import {
@@ -18,15 +19,24 @@ import { MobileControlPanel } from '@/components/mobile-control-panel'
 import { MobileKakaoAd } from '@/components/mobile-kakao-ad'
 import { MobileLottoSlipCarousel } from '@/components/mobile-lotto-slip-carousel'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { DashboardAnalytics } from './analytics'
 import { AutoPurchaseRunner } from './auto-purchase-runner'
-import { Charts } from './charts'
 import { LottoResult } from './lotto-result'
 import { Overview } from './overview'
 import { RecentSales } from './recent-sales'
 import { Statistics } from './statistics'
+import { useInView } from '@/hooks/use-in-view'
+import { Skeleton } from '@/components/ui/skeleton'
+
+const LazyDashboardAnalytics = lazy(() =>
+  import('./analytics').then((module) => ({ default: module.DashboardAnalytics }))
+)
+
+const LazyCharts = lazy(() =>
+  import('./charts').then((module) => ({ default: module.Charts }))
+)
 
 export function Dashboard() {
+  const [activeTab, setActiveTab] = useState('overview')
   const { isMobile } = useSidebar()
   const { usedMoney, totalPrize, submittedCount } = useResultStore()
   const kakaoAdUnit = import.meta.env.VITE_KAKAO_AD_UNIT_2
@@ -40,6 +50,13 @@ export function Dashboard() {
   const formattedNetProfit = `${netProfit >= 0 ? '+' : ''}${netProfit.toLocaleString()} 원`
   const formattedProfitRate = `${profitRate >= 0 ? '+' : ''}${profitRate.toFixed(2)}%`
   const headerOffsetClass = isMobile ? 'mt-[120px]' : undefined
+
+  const observerOptions = useMemo<IntersectionObserverInit>(() => ({
+    rootMargin: '200px 0px',
+  }), [])
+
+  const { ref: chartsRef, isInView: isChartsInView } =
+    useInView<HTMLDivElement>(observerOptions)
 
   return (
     <>
@@ -96,7 +113,8 @@ export function Dashboard() {
       <Main className={isMobile ? 'mb-24' : undefined}>
         <Tabs
           orientation='vertical'
-          defaultValue='overview'
+          value={activeTab}
+          onValueChange={setActiveTab}
           className='space-y-4'
         >
           <div className='w-full overflow-x-auto pb-2'>
@@ -152,17 +170,27 @@ export function Dashboard() {
             </div>
 
             <Card>
-              <CardHeader>
-                <CardTitle>차트</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Charts />
-              </CardContent>
+              <div ref={chartsRef}>
+                <CardHeader>
+                  <CardTitle>차트</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Suspense fallback={<ChartsFallback />}>
+                    {isChartsInView ? <LazyCharts /> : <ChartsFallback />}
+                  </Suspense>
+                </CardContent>
+              </div>
             </Card>
           </TabsContent>
 
           <TabsContent value='analytics' className='space-y-4'>
-            <DashboardAnalytics />
+            <Suspense fallback={<AnalyticsFallback />}>
+              {activeTab === 'analytics' ? (
+                <LazyDashboardAnalytics />
+              ) : (
+                <AnalyticsFallback />
+              )}
+            </Suspense>
           </TabsContent>
 
           <TabsContent value='reports' className='space-y-4'>
@@ -295,5 +323,19 @@ export function Dashboard() {
       </Main>
       {isMobile && <MobileControlPanel />}
     </>
+  )
+}
+
+function ChartsFallback() {
+  return <Skeleton className='h-[240px] w-full' />
+}
+
+function AnalyticsFallback() {
+  return (
+    <div className='space-y-4'>
+      <Skeleton className='h-[280px] w-full' />
+      <Skeleton className='h-[280px] w-full' />
+      <Skeleton className='h-[280px] w-full' />
+    </div>
   )
 }
