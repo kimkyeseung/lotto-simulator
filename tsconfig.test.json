@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "./.test-build",
+    "module": "ESNext",
+    "target": "ES2020",
+    "allowImportingTsExtensions": false,
+    "types": ["node"],
+    "moduleResolution": "Bundler"
+  },
+  "include": ["src/lib/lotto.ts", "tests/**/*.ts"],
+  "exclude": ["node_modules"]
+}
