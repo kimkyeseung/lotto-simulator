@@ -13,7 +13,8 @@
     "knip": "knip",
     "test": "tsc -p tsconfig.test.json && node --test .test-build/tests/*.test.js",
     "test:lotto": "tsc -p tsconfig.test.json && node --test .test-build/tests/lotto.test.js",
-    "test:check-result": "tsc -p tsconfig.test.json && node --test .test-build/tests/checkLottoResult.test.js"
+    "test:check-result": "tsc -p tsconfig.test.json && node --test .test-build/tests/checkLottoResult.test.js",
+    "test:performance": "tsc -p tsconfig.test.json && node --test .test-build/tests/performance-benchmark.test.js"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.42.1",
