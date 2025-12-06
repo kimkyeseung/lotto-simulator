@@ -1,20 +1,23 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { lottoFormSchema, type LottoFormSchema } from '@/schemas/lotto'
+import { useResultStore } from '@/stores/result'
 import { NumberBall } from './ui/number-ball'
 import { Switch } from './ui/switch'
 
 // Tailwind CSS를 활용한 버튼 스타일
-const numberButtonClass = (isSelected: boolean, isDisabled: boolean) =>
-  `w-4 h-8 text-xs rounded-full border-1 transition-colors ${
+const numberButtonClass = (isSelected: boolean, isDisabled: boolean, isSubmitted: boolean) =>
+  `w-4 h-8 text-xs rounded-full border-1 transition-all ${
     isDisabled
       ? 'bg-gray-200 border-gray-200 text-gray-500 cursor-not-allowed'
       : isSelected
         ? 'bg-primary border-primary text-white'
-        : 'bg-white border-gray-300 text-gray-800 hover:bg-gray-100'
+        : isSubmitted
+          ? 'bg-white border-primary text-gray-800 hover:bg-gray-100'
+          : 'bg-white border-gray-300 text-gray-800 hover:bg-gray-100'
   }`
 
 interface LottoFormProps {
@@ -36,6 +39,8 @@ export function LottoForm({ onFormChange, formName }: LottoFormProps) {
 
   const isEnabled = watch('isEnabled')
   const selectedNumbers = watch('numbers')
+  const submittedTickets = useResultStore((state) => state.submittedTickets)
+  const [submittedNumbers, setSubmittedNumbers] = useState<number[]>([])
 
   // 폼 필드 값이 변경될 때마다 상위 컴포넌트로 전달
   useEffect(() => {
@@ -44,6 +49,19 @@ export function LottoForm({ onFormChange, formName }: LottoFormProps) {
     })
     return () => subscription.unsubscribe()
   }, [form, onFormChange])
+
+  // 제출된 티켓에서 현재 폼의 번호 추출
+  useEffect(() => {
+    if (submittedTickets.length > 0) {
+      // formName에 해당하는 티켓 찾기 (A, B, C, D, E 순서로 0-4 인덱스)
+      const formIndex = formName.charCodeAt(0) - 'A'.charCodeAt(0)
+      const ticket = submittedTickets[formIndex]
+
+      if (ticket) {
+        setSubmittedNumbers(ticket)
+      }
+    }
+  }, [submittedTickets, formName])
 
   const handleNumberClick = (number: number) => {
     if (!isEnabled) return
@@ -80,7 +98,8 @@ export function LottoForm({ onFormChange, formName }: LottoFormProps) {
               onClick={() => handleNumberClick(number)}
               className={numberButtonClass(
                 selectedNumbers.includes(number),
-                !isEnabled
+                !isEnabled,
+                submittedNumbers.includes(number)
               )}
               disabled={
                 !isEnabled ||
