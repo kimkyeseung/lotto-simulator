@@ -18,12 +18,12 @@ const numberButtonClass = (
 ) =>
   `w-4 h-8 text-xs rounded-full border-1 transition-all ${
     isDisabled
-      ? 'bg-gray-200 border-gray-200 text-gray-500 cursor-not-allowed'
+      ? 'bg-muted border-muted text-muted-foreground cursor-not-allowed'
       : isSelected
-        ? 'bg-primary border-primary text-white'
+        ? 'bg-primary border-primary text-primary-foreground'
         : isSubmitted
-          ? 'bg-white border-primary text-gray-800 hover:bg-gray-100'
-          : 'bg-white border-gray-300 text-gray-800 hover:bg-gray-100'
+          ? 'bg-background border-primary text-foreground hover:bg-accent'
+          : 'bg-background border-border text-foreground hover:bg-accent'
   }`
 
 interface LottoFormProps {
@@ -83,13 +83,13 @@ export function LottoForm({ onFormChange, formName, initialNumbers = [] }: Lotto
   }
 
   return (
-    <div className='flex flex-col overflow-hidden rounded-lg border bg-white shadow-sm'>
-      <div className='flex justify-center bg-gray-200 text-xs text-white'>
+    <div className='flex flex-col overflow-hidden rounded-lg border bg-card shadow-sm'>
+      <div className='flex justify-center bg-muted text-xs text-muted-foreground font-medium'>
         {formName}
       </div>
       <div className='space-y-4 p-2 md:p-4'>
         <div className='flex items-center justify-end gap-2'>
-          <label className='text-sm text-gray-800'>사용</label>
+          <label className='text-sm text-foreground'>사용</label>
           <Switch
             checked={isEnabled}
             onCheckedChange={(value) => {
@@ -123,7 +123,7 @@ export function LottoForm({ onFormChange, formName, initialNumbers = [] }: Lotto
           })}
         </div>
         {isEnabled && (
-          <div className='justify-endtext-gray-800'>
+          <div className='text-foreground'>
             선택된 번호:
             {manuallySelectedNumbers.length > 0 ? (
               <div className='flex gap-1'>
@@ -141,7 +141,7 @@ export function LottoForm({ onFormChange, formName, initialNumbers = [] }: Lotto
           </div>
         )}
         {isEnabled && (
-          <div className='text-sm text-gray-500'>
+          <div className='text-sm text-muted-foreground'>
             {manuallySelectedNumbers.length !== 6 &&
               `${6 - manuallySelectedNumbers.length}개의 번호가 자동으로 선택`}
           </div>
