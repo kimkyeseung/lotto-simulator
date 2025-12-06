@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import {
   Bar,
   BarChart,
@@ -8,7 +8,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { useShallow } from 'zustand/shallow'
 import { useResultStore } from '@/stores/result'
 import { Button } from '@/components/ui/button'
 import { CustomTooltip } from './custom-tooltip'
@@ -17,25 +16,45 @@ const SERIES = [
   {
     key: 'submittedCount',
     label: '구매 횟수',
-    color: 'hsl(var(--muted-foreground))',
+    lightColor: '#f59e0b', // amber-500
+    darkColor: '#fbbf24', // amber-400
   },
   {
     key: 'resultCount',
     label: '추첨 결과 수',
-    color: 'hsl(var(--secondary))',
+    lightColor: '#06b6d4', // cyan-500
+    darkColor: '#22d3ee', // cyan-400
   },
   {
     key: 'hitCount',
     label: '적중 횟수',
-    color: 'hsl(var(--primary))',
+    lightColor: '#8b5cf6', // violet-500
+    darkColor: '#a78bfa', // violet-400
   },
 ] as const
 
 export function Charts() {
-  const numberStatsMap = useResultStore(
-    useShallow((state) => state.numberStatsMap)
-  )
+  const numberStatsMap = useResultStore((state) => state.numberStatsMap)
   const [activeKeys, setActiveKeys] = useState<string[]>(SERIES.map((series) => series.key))
+  const [isDark, setIsDark] = useState(false)
+
+  useEffect(() => {
+    // 다크 모드 감지
+    const checkDarkMode = () => {
+      setIsDark(document.documentElement.classList.contains('dark'))
+    }
+
+    checkDarkMode()
+
+    // MutationObserver로 다크 모드 변경 감지
+    const observer = new MutationObserver(checkDarkMode)
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    })
+
+    return () => observer.disconnect()
+  }, [])
 
   const data = useMemo(() => {
     return Object.entries(numberStatsMap)
@@ -82,7 +101,9 @@ export function Charts() {
               >
                 <span
                   className='inline-block size-2.5 rounded-full'
-                  style={{ backgroundColor: series.color }}
+                  style={{
+                    backgroundColor: isDark ? series.darkColor : series.lightColor
+                  }}
                   aria-hidden='true'
                 />
                 {series.label}
@@ -94,31 +115,41 @@ export function Charts() {
 
       {hasChartData ? (
         <ResponsiveContainer width='100%' height={360}>
-          <BarChart data={data} barGap={2}>
-            <CartesianGrid strokeDasharray='3 3' stroke='hsl(var(--border))' />
+          <BarChart data={data} barGap={2} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+            <CartesianGrid
+              strokeDasharray='3 3'
+              stroke='hsl(var(--border))'
+              opacity={0.3}
+              vertical={false}
+            />
             <XAxis
               dataKey='number'
-              stroke='hsl(var(--muted-foreground))'
+              stroke='hsl(var(--foreground))'
               fontSize={12}
               tickLine={false}
               axisLine={false}
+              opacity={0.7}
             />
             <YAxis
-              stroke='hsl(var(--muted-foreground))'
+              stroke='hsl(var(--foreground))'
               fontSize={12}
               tickLine={false}
               axisLine={false}
+              opacity={0.7}
               tickFormatter={(value) => value.toLocaleString()}
             />
-            <Tooltip content={CustomTooltip} cursor={{ fill: 'hsl(var(--muted) / 0.35)' }} />
+            <Tooltip
+              content={CustomTooltip}
+              cursor={{ fill: 'hsl(var(--muted) / 0.5)', radius: 4 }}
+            />
             {SERIES.filter((series) => activeKeys.includes(series.key)).map((series) => (
               <Bar
                 key={series.key}
                 dataKey={series.key}
-                fill={series.color}
+                fill={isDark ? series.darkColor : series.lightColor}
                 isAnimationActive={false}
                 radius={[4, 4, 0, 0]}
-                maxBarSize={16}
+                maxBarSize={18}
               />
             ))}
           </BarChart>
