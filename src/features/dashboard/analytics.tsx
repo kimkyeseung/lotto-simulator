@@ -268,8 +268,14 @@ function useNumberHeatmapStats() {
   const numberStatsMap = useResultStore((state) => state.numberStatsMap)
 
   return useMemo(() => {
-    let maxSubmittedCount = 0
-    let maxHitCount = 0
+    let maxFrequencyRatio = 0
+    let maxHitRate = 0
+    let totalSubmittedCount = 0
+
+    // 전체 구매 횟수 계산
+    Object.values(numberStatsMap).forEach((stats) => {
+      totalSubmittedCount += stats.submittedCount
+    })
 
     const stats = Array.from({ length: 45 }, (_, index) => {
       const number = index + 1
@@ -278,11 +284,18 @@ function useNumberHeatmapStats() {
       const hitCount = statsForNumber?.hitCount ?? 0
       const resultCount = statsForNumber?.resultCount ?? 0
 
-      if (submittedCount > maxSubmittedCount) {
-        maxSubmittedCount = submittedCount
+      // 구매 빈도 비율 (전체 대비)
+      const frequencyRatio =
+        totalSubmittedCount > 0 ? submittedCount / totalSubmittedCount : 0
+
+      // 적중률 (구매 대비 적중 비율)
+      const hitRate = submittedCount > 0 ? (hitCount / submittedCount) * 100 : 0
+
+      if (frequencyRatio > maxFrequencyRatio) {
+        maxFrequencyRatio = frequencyRatio
       }
-      if (hitCount > maxHitCount) {
-        maxHitCount = hitCount
+      if (hitRate > maxHitRate) {
+        maxHitRate = hitRate
       }
 
       return {
@@ -290,15 +303,17 @@ function useNumberHeatmapStats() {
         submittedCount,
         hitCount,
         resultCount,
+        frequencyRatio,
+        hitRate,
       }
     })
 
-    return { stats, maxSubmittedCount, maxHitCount }
+    return { stats, maxFrequencyRatio, maxHitRate }
   }, [numberStatsMap])
 }
 
 function NumberFrequencyHeatmap() {
-  const { stats, maxSubmittedCount } = useNumberHeatmapStats()
+  const { stats, maxFrequencyRatio } = useNumberHeatmapStats()
 
   return (
     <Card className='h-full'>
@@ -310,10 +325,10 @@ function NumberFrequencyHeatmap() {
           {stats.map((item) => (
             <div
               key={item.number}
-              className={`flex aspect-square flex-col items-center justify-center rounded-md p-1 ${getIntensityClass(item.submittedCount, maxSubmittedCount, frequencyPalette)}`}
+              className={`flex aspect-square flex-col items-center justify-center rounded-md p-1 ${getIntensityClass(item.frequencyRatio, maxFrequencyRatio, frequencyPalette)}`}
             >
               <span className='font-semibold'>{item.number}</span>
-              <span>{item.submittedCount}</span>
+              <span>{(item.frequencyRatio * 100).toFixed(1)}%</span>
             </div>
           ))}
         </div>
@@ -327,7 +342,7 @@ function NumberFrequencyHeatmap() {
 }
 
 function NumberHitFrequencyHeatmap() {
-  const { stats, maxHitCount } = useNumberHeatmapStats()
+  const { stats, maxHitRate } = useNumberHeatmapStats()
 
   return (
     <Card className='h-full'>
@@ -339,10 +354,10 @@ function NumberHitFrequencyHeatmap() {
           {stats.map((item) => (
             <div
               key={item.number}
-              className={`flex aspect-square flex-col items-center justify-center rounded-md p-1 ${getIntensityClass(item.hitCount, maxHitCount, hitPalette)}`}
+              className={`flex aspect-square flex-col items-center justify-center rounded-md p-1 ${getIntensityClass(item.hitRate, maxHitRate, hitPalette)}`}
             >
               <span className='font-semibold'>{item.number}</span>
-              <span>{item.hitCount}</span>
+              <span>{item.hitRate.toFixed(1)}%</span>
             </div>
           ))}
         </div>
