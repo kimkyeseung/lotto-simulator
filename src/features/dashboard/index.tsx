@@ -12,7 +12,6 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { useSidebar } from '@/components/ui/sidebar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { KakaoAd } from '@/components/kakao-ad'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { LottoTicketsForm } from '@/components/lotto-ticket-form'
@@ -22,6 +21,7 @@ import { MobileLottoSlipCarousel } from '@/components/mobile-lotto-slip-carousel
 import { ThemeSwitch } from '@/components/theme-switch'
 import { AutoPurchaseRunner } from './auto-purchase-runner'
 import { LottoResult } from './lotto-result'
+import { LuckyNumbers } from './lucky-numbers'
 import { Overview } from './overview'
 import { RecentSales } from './recent-sales'
 import { Statistics } from './statistics'
@@ -46,7 +46,6 @@ export function Dashboard() {
       submittedCount: state.submittedCount,
     }))
   )
-  const kakaoAdUnit = import.meta.env.VITE_KAKAO_AD_UNIT_2
   const netProfit = totalPrize - usedMoney
   const profitRate =
     usedMoney === 0 ? 0 : ((totalPrize - usedMoney) / usedMoney) * 100
@@ -164,14 +163,16 @@ export function Dashboard() {
               </Card>
 
               {!isMobile && (
-                <Card className='overflow-hidden p-0 lg:col-span-5'>
-                  {kakaoAdUnit ? (
-                    <KakaoAd unitId={kakaoAdUnit} width={350} height={250} />
-                  ) : (
-                    <p className='text-muted-foreground text-sm'>
-                      환경 변수에 Kakao 광고 정보를 입력하면 광고가 표시됩니다.
-                    </p>
-                  )}
+                <Card className='lg:col-span-5'>
+                  <CardHeader>
+                    <CardTitle>추천 번호</CardTitle>
+                    <CardDescription>
+                      시뮬레이션 통계 기반 분석
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <LuckyNumbers />
+                  </CardContent>
                 </Card>
               )}
             </div>
