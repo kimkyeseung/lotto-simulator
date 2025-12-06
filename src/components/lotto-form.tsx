@@ -9,7 +9,13 @@ import { NumberBall } from './ui/number-ball'
 import { Switch } from './ui/switch'
 
 // Tailwind CSS를 활용한 버튼 스타일
-const numberButtonClass = (isSelected: boolean, isDisabled: boolean, isSubmitted: boolean) =>
+// isSelected: 사용자가 직접 선택한 번호
+// isSubmitted: 제출된 번호 (자동 선택 포함)
+const numberButtonClass = (
+  isSelected: boolean,
+  isDisabled: boolean,
+  isSubmitted: boolean
+) =>
   `w-4 h-8 text-xs rounded-full border-1 transition-all ${
     isDisabled
       ? 'bg-gray-200 border-gray-200 text-gray-500 cursor-not-allowed'
@@ -23,24 +29,26 @@ const numberButtonClass = (isSelected: boolean, isDisabled: boolean, isSubmitted
 interface LottoFormProps {
   onFormChange: (data: LottoFormSchema) => void
   formName: LottoFormSchema['name']
+  initialNumbers?: number[]
 }
 
-export function LottoForm({ onFormChange, formName }: LottoFormProps) {
+export function LottoForm({ onFormChange, formName, initialNumbers = [] }: LottoFormProps) {
   const form = useForm<LottoFormSchema>({
     resolver: zodResolver(lottoFormSchema),
     defaultValues: {
       name: formName,
       isEnabled: true,
-      numbers: [],
+      numbers: initialNumbers,
     },
   })
 
   const { setValue, watch } = form
 
   const isEnabled = watch('isEnabled')
-  const selectedNumbers = watch('numbers')
   const submittedTickets = useResultStore((state) => state.submittedTickets)
   const [submittedNumbers, setSubmittedNumbers] = useState<number[]>([])
+  // 사용자가 수동으로 선택한 번호만 별도 관리 (초기값은 props에서)
+  const [manuallySelectedNumbers, setManuallySelectedNumbers] = useState<number[]>(initialNumbers)
 
   // 폼 필드 값이 변경될 때마다 상위 컴포넌트로 전달
   useEffect(() => {
@@ -50,10 +58,9 @@ export function LottoForm({ onFormChange, formName }: LottoFormProps) {
     return () => subscription.unsubscribe()
   }, [form, onFormChange])
 
-  // 제출된 티켓에서 현재 폼의 번호 추출
+  // 제출된 티켓에서 현재 폼의 번호 추출 (표시용)
   useEffect(() => {
     if (submittedTickets.length > 0) {
-      // formName에 해당하는 티켓 찾기 (A, B, C, D, E 순서로 0-4 인덱스)
       const formIndex = formName.charCodeAt(0) - 'A'.charCodeAt(0)
       const ticket = submittedTickets[formIndex]
 
@@ -66,10 +73,12 @@ export function LottoForm({ onFormChange, formName }: LottoFormProps) {
   const handleNumberClick = (number: number) => {
     if (!isEnabled) return
 
-    const newNumbers = selectedNumbers.includes(number)
-      ? selectedNumbers.filter((n) => n !== number)
-      : [...selectedNumbers, number]
+    const isCurrentlySelected = manuallySelectedNumbers.includes(number)
+    const newNumbers = isCurrentlySelected
+      ? manuallySelectedNumbers.filter((n) => n !== number)
+      : [...manuallySelectedNumbers, number]
 
+    setManuallySelectedNumbers(newNumbers)
     setValue('numbers', newNumbers, { shouldValidate: true })
   }
 
@@ -91,32 +100,34 @@ export function LottoForm({ onFormChange, formName }: LottoFormProps) {
         <div
           className={`grid grid-cols-12 gap-2 sm:grid-cols-7 md:grid-cols-9 lg:grid-cols-10 ${isEnabled ? '' : 'opacity-50'}`}
         >
-          {Array.from({ length: 45 }, (_, i) => i + 1).map((number) => (
-            <button
-              key={number}
-              type='button'
-              onClick={() => handleNumberClick(number)}
-              className={numberButtonClass(
-                selectedNumbers.includes(number),
-                !isEnabled,
-                submittedNumbers.includes(number)
-              )}
-              disabled={
-                !isEnabled ||
-                (!selectedNumbers.includes(number) &&
-                  selectedNumbers.length >= 6)
-              }
-            >
-              {number}
-            </button>
-          ))}
+          {Array.from({ length: 45 }, (_, i) => i + 1).map((number) => {
+            const isManuallySelected = manuallySelectedNumbers.includes(number)
+            const isSubmittedOnly =
+              submittedNumbers.includes(number) && !isManuallySelected
+
+            return (
+              <button
+                key={number}
+                type='button'
+                onClick={() => handleNumberClick(number)}
+                className={numberButtonClass(isManuallySelected, !isEnabled, isSubmittedOnly)}
+                disabled={
+                  !isEnabled ||
+                  (!manuallySelectedNumbers.includes(number) &&
+                    manuallySelectedNumbers.length >= 6)
+                }
+              >
+                {number}
+              </button>
+            )
+          })}
         </div>
         {isEnabled && (
           <div className='justify-endtext-gray-800'>
             선택된 번호:
-            {selectedNumbers.length > 0 ? (
+            {manuallySelectedNumbers.length > 0 ? (
               <div className='flex gap-1'>
-                {selectedNumbers
+                {manuallySelectedNumbers
                   .sort((a, b) => a - b)
                   .map((number) => (
                     <NumberBall isSmall key={number}>
@@ -131,8 +142,8 @@ export function LottoForm({ onFormChange, formName }: LottoFormProps) {
         )}
         {isEnabled && (
           <div className='text-sm text-gray-500'>
-            {selectedNumbers.length !== 6 &&
-              `${6 - selectedNumbers.length}개의 번호가 자동으로 선택`}
+            {manuallySelectedNumbers.length !== 6 &&
+              `${6 - manuallySelectedNumbers.length}개의 번호가 자동으로 선택`}
           </div>
         )}
       </div>

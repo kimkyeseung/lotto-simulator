@@ -16,6 +16,7 @@ export function LottoTicketsForm() {
           <LottoForm
             formName={t.name}
             key={index}
+            initialNumbers={t.numbers}
             onFormChange={(newData) => updateForm(index, newData)}
           />
         ))}
