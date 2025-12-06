@@ -1,4 +1,5 @@
 import { Suspense, lazy, useMemo, useState } from 'react'
+import { useShallow } from 'zustand/shallow'
 import { useResultStore } from '@/stores/result'
 import { cn } from '@/lib/utils'
 import {
@@ -38,7 +39,13 @@ const LazyCharts = lazy(() =>
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState('overview')
   const { isMobile } = useSidebar()
-  const { usedMoney, totalPrize, submittedCount } = useResultStore()
+  const { usedMoney, totalPrize, submittedCount } = useResultStore(
+    useShallow((state) => ({
+      usedMoney: state.usedMoney,
+      totalPrize: state.totalPrize,
+      submittedCount: state.submittedCount,
+    }))
+  )
   const kakaoAdUnit = import.meta.env.VITE_KAKAO_AD_UNIT_2
   const netProfit = totalPrize - usedMoney
   const profitRate =

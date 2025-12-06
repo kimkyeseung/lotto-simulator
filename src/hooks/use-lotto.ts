@@ -40,7 +40,11 @@ export function useLotto(options?: UseLottoOptions) {
     let timeoutId: number // ID를 저장할 변수
 
     const runSimulation = () => {
-      onSubmit()
+      // validForms를 직접 가져와서 dependency 문제 해결
+      const currentForms = selectValidForms(useFormStore.getState())
+      if (currentForms.length === 0) return
+
+      submitLotto(currentForms)
       // 현재 작업이 완료된 후, 다음 작업을 예약
       timeoutId = window.setTimeout(runSimulation, 100)
     }
@@ -51,7 +55,7 @@ export function useLotto(options?: UseLottoOptions) {
     return () => {
       window.clearTimeout(timeoutId)
     }
-  }, [enableAutoRunner, isAutoRunning, onSubmit])
+  }, [enableAutoRunner, isAutoRunning, submitLotto])
 
   return {
     validForms,
