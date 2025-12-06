@@ -1,4 +1,4 @@
-import { Suspense, lazy, useMemo, useState } from 'react'
+import { Suspense, lazy, useState } from 'react'
 import { useShallow } from 'zustand/shallow'
 import { useResultStore } from '@/stores/result'
 import { cn } from '@/lib/utils'
@@ -25,7 +25,6 @@ import { LuckyNumbers } from './lucky-numbers'
 import { Overview } from './overview'
 import { RecentSales } from './recent-sales'
 import { Statistics } from './statistics'
-import { useInView } from '@/hooks/use-in-view'
 import { Skeleton } from '@/components/ui/skeleton'
 
 const LazyDashboardAnalytics = lazy(() =>
@@ -57,12 +56,6 @@ export function Dashboard() {
   const formattedProfitRate = `${profitRate >= 0 ? '+' : ''}${profitRate.toFixed(2)}%`
   const headerOffsetClass = isMobile ? 'mt-[120px]' : undefined
 
-  const observerOptions = useMemo<IntersectionObserverInit>(() => ({
-    rootMargin: '200px 0px',
-  }), [])
-
-  const { ref: chartsRef, isInView: isChartsInView } =
-    useInView<HTMLDivElement>(observerOptions)
 
   return (
     <>
@@ -178,16 +171,14 @@ export function Dashboard() {
             </div>
 
             <Card>
-              <div ref={chartsRef}>
-                <CardHeader>
-                  <CardTitle>차트</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Suspense fallback={<ChartsFallback />}>
-                    {isChartsInView ? <LazyCharts /> : <ChartsFallback />}
-                  </Suspense>
-                </CardContent>
-              </div>
+              <CardHeader>
+                <CardTitle>차트</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Suspense fallback={<ChartsFallback />}>
+                  <LazyCharts />
+                </Suspense>
+              </CardContent>
             </Card>
           </TabsContent>
 
