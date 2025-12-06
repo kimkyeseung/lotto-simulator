@@ -25,6 +25,7 @@ export type SimulationSnapshot = {
   totalPrize: number
   netProfit: number
   profitRate: number
+  winningRanks: WinningRank[] // 이번 회차에서 나온 등수들
 }
 
 const TRACKED_RANKS: WinningRank[] = [1, 2, 3, 4, 5, 0]
@@ -159,10 +160,15 @@ export const useResultStore = create<ResultState>((set, get) => ({
 
     const submissionRankCounts = createInitialWinningRankCounts()
     let updatedNumberStatsMap = currentNumberStatsMap
+    const winningRanks: WinningRank[] = []
 
     const prizes = normalizedForms.reduce((acc, form) => {
       const result = checkLottoResult(form, winningNumbers)
       const prize = prizeMap[result.rank as keyof typeof prizeMap] || 0
+
+      // 당첨 등수 수집
+      winningRanks.push(result.rank)
+
       if (result.rank !== 0) {
         switch (result.rank) {
           case 1:
@@ -245,6 +251,7 @@ export const useResultStore = create<ResultState>((set, get) => ({
       totalPrize: updatedTotalPrize,
       netProfit,
       profitRate,
+      winningRanks,
     }
 
     const nextHistory = [...currentHistory, nextSnapshot]
