@@ -9,6 +9,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { createPortal } from 'react-dom'
 import { GoogleAnalytics } from '@/components/google-analytics'
+import { StructuredData } from '@/components/structured-data'
 import { defaultSeo } from '@/utils/seo'
 import { Toaster } from '@/components/ui/sonner'
 import { NavigationProgress } from '@/components/navigation-progress'
@@ -63,6 +64,7 @@ export const Route = createRootRouteWithContext<{
     return (
       <>
         <HeadManager />
+        <StructuredData />
         <GoogleAnalytics />
         <NavigationProgress />
         <Outlet />

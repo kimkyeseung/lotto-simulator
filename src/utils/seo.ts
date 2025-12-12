@@ -1,6 +1,6 @@
 const BASE_URL =
   import.meta.env.VITE_APP_URL ?? 'https://lotto-simulator-three.vercel.app/'
-const DEFAULT_IMAGE_PATH = '/images/lotto-logo.svg'
+const DEFAULT_IMAGE_PATH = '/images/og-image.png'
 
 type SeoInput = {
   title: string

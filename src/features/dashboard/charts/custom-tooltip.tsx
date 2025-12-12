@@ -32,11 +32,14 @@ export function CustomTooltip({
     return null
   }
 
-  const [
-    { value: submittedCount = 0 },
-    { value: _resultCount = 0 },
-    { value: hitCount = 0 },
-  ] = payload
+  // payload에서 각 값을 안전하게 추출
+  const getPayloadValue = (name: keyof typeof labelMap): number => {
+    const item = payload.find((p) => p.name === name)
+    return (item?.value as number) ?? 0
+  }
+
+  const submittedCount = getPayloadValue('submittedCount')
+  const hitCount = getPayloadValue('hitCount')
 
   const hitRate = formatDecimal((hitCount / submittedCount) * 100 || 0)
 
@@ -48,17 +51,17 @@ export function CustomTooltip({
         </CardTitle>
       </CardHeader>
 
-      {isVisible && (
-        <CardContent className='text-sm'>
-          {payload.map((p: Payload, index) => (
-            <div key={index} className='flex gap-2'>
-              <p className='text-muted-foreground'>{labelMap[p.name]}:</p>
-              <p>{p.value}회</p>
-            </div>
-          ))}
+      <CardContent className='text-sm'>
+        {payload.map((p: Payload, index) => (
+          <div key={index} className='flex gap-2'>
+            <p className='text-muted-foreground'>{labelMap[p.name]}:</p>
+            <p>{p.value}회</p>
+          </div>
+        ))}
+        {submittedCount > 0 && (
           <div className='mt-1'>적중률: {hitRate}%</div>
-        </CardContent>
-      )}
+        )}
+      </CardContent>
     </Card>
   )
 }

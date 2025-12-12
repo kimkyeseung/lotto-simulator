@@ -25,6 +25,7 @@ export type SimulationSnapshot = {
   totalPrize: number
   netProfit: number
   profitRate: number
+  winningRanks: WinningRank[] // 이번 회차에서 나온 등수들
 }
 
 const TRACKED_RANKS: WinningRank[] = [1, 2, 3, 4, 5, 0]
@@ -141,35 +142,33 @@ export const useResultStore = create<ResultState>((set, get) => ({
   submitLotto: (validForms: LottoFormSchema[]) => {
     if (validForms.length === 0) return
 
+    const state = get()
     const {
-      addSubmittedCount,
-      addUsedMoney,
-      setSubmittedTickets,
-      setWinningNumbers,
-      addTotalPrize,
-      setNumberStatsMap,
       isFifthRankToastShown,
       setFifthRankToastShown,
-      setWinningRankCounts,
-      setHistory,
-    } = get()
+      numberStatsMap: currentNumberStatsMap,
+      winningRankCounts: currentWinningRankCounts,
+      history: currentHistory,
+    } = state
     const { prizeMap } = useConfigStore.getState()
     const cost = validForms.length * 1000
 
-    addSubmittedCount(1)
-    addUsedMoney(cost)
     const normalizedForms = validForms.map((form) =>
       normalizeAndCompleteLottoNumbers(form.numbers)
     )
-    setSubmittedTickets(normalizedForms)
     const winningNumbers = generateLottoNumbers({ isContainBonusNumber: true })
-    setWinningNumbers(winningNumbers)
 
     const submissionRankCounts = createInitialWinningRankCounts()
+    let updatedNumberStatsMap = currentNumberStatsMap
+    const winningRanks: WinningRank[] = []
 
     const prizes = normalizedForms.reduce((acc, form) => {
       const result = checkLottoResult(form, winningNumbers)
       const prize = prizeMap[result.rank as keyof typeof prizeMap] || 0
+
+      // 당첨 등수 수집
+      winningRanks.push(result.rank)
+
       if (result.rank !== 0) {
         switch (result.rank) {
           case 1:
@@ -211,57 +210,66 @@ export const useResultStore = create<ResultState>((set, get) => ({
       }
       submissionRankCounts[result.rank] =
         (submissionRankCounts[result.rank] ?? 0) + 1
-      setNumberStatsMap((currentStatsMap) =>
-        updateNumberStats(currentStatsMap, form, result.matchedNumbers)
+      updatedNumberStatsMap = updateNumberStats(
+        updatedNumberStatsMap,
+        form,
+        result.matchedNumbers
       )
       return acc + prize
     }, 0)
-    setNumberStatsMap((currentStats) =>
-      updateWinningNumberStats(currentStats, winningNumbers)
+
+    updatedNumberStatsMap = updateWinningNumberStats(
+      updatedNumberStatsMap,
+      winningNumbers
     )
 
-    setWinningRankCounts((currentCounts) => {
-      const nextCounts = { ...currentCounts }
-      for (const rank of TRACKED_RANKS) {
-        const submissionCount = submissionRankCounts[rank] ?? 0
-        if (!submissionCount) continue
-        nextCounts[rank] = (nextCounts[rank] ?? 0) + submissionCount
-      }
-      return nextCounts
-    })
+    const nextWinningRankCounts = { ...currentWinningRankCounts }
+    for (const rank of TRACKED_RANKS) {
+      const submissionCount = submissionRankCounts[rank] ?? 0
+      if (!submissionCount) continue
+      nextWinningRankCounts[rank] =
+        (nextWinningRankCounts[rank] ?? 0) + submissionCount
+    }
 
-    addTotalPrize(prizes)
+    const updatedUsedMoney = state.usedMoney + cost
+    const updatedTotalPrize = state.totalPrize + prizes
+    const updatedSubmittedCount = state.submittedCount + 1
 
-    const {
+    const netProfit = updatedTotalPrize - updatedUsedMoney
+    const profitRate =
+      updatedUsedMoney === 0
+        ? 0
+        : ((updatedTotalPrize - updatedUsedMoney) / updatedUsedMoney) * 100
+
+    const lastSnapshot = currentHistory[currentHistory.length - 1]
+
+    const nextSnapshot: SimulationSnapshot = {
+      id: (lastSnapshot?.id ?? 0) + 1,
+      timestamp: Date.now(),
+      submittedCount: updatedSubmittedCount,
+      usedMoney: updatedUsedMoney,
+      totalPrize: updatedTotalPrize,
+      netProfit,
+      profitRate,
+      winningRanks,
+    }
+
+    const nextHistory = [...currentHistory, nextSnapshot]
+    const finalHistory =
+      nextHistory.length > MAX_HISTORY_LENGTH
+        ? nextHistory.slice(nextHistory.length - MAX_HISTORY_LENGTH)
+        : nextHistory
+
+    // 모든 상태를 한 번에 업데이트
+    set({
       usedMoney: updatedUsedMoney,
       totalPrize: updatedTotalPrize,
       submittedCount: updatedSubmittedCount,
-    } = get()
-
-    setHistory((currentHistory) => {
-      const netProfit = updatedTotalPrize - updatedUsedMoney
-      const profitRate =
-        updatedUsedMoney === 0
-          ? 0
-          : ((updatedTotalPrize - updatedUsedMoney) / updatedUsedMoney) * 100
-
-      const lastSnapshot = currentHistory[currentHistory.length - 1]
-
-      const nextSnapshot: SimulationSnapshot = {
-        id: (lastSnapshot?.id ?? 0) + 1,
-        timestamp: Date.now(),
-        submittedCount: updatedSubmittedCount,
-        usedMoney: updatedUsedMoney,
-        totalPrize: updatedTotalPrize,
-        netProfit,
-        profitRate,
-      }
-
-      const nextHistory = [...currentHistory, nextSnapshot]
-      if (nextHistory.length > MAX_HISTORY_LENGTH) {
-        return nextHistory.slice(nextHistory.length - MAX_HISTORY_LENGTH)
-      }
-      return nextHistory
+      submittedTickets: normalizedForms,
+      winningNumbers,
+      numberStatsMap: updatedNumberStatsMap,
+      winningRankCounts: nextWinningRankCounts,
+      history: finalHistory,
     })
   },
   initialize: () =>
