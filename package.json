@@ -11,7 +11,9 @@
     "format:check": "prettier --check .",
     "format": "prettier --write .",
     "knip": "knip",
-    "test": "tsc -p tsconfig.test.json && node --test .test-build/tests/*.test.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:legacy": "tsc -p tsconfig.test.json && node --test .test-build/tests/*.test.js",
     "test:lotto": "tsc -p tsconfig.test.json && node --test .test-build/tests/lotto.test.js",
     "test:check-result": "tsc -p tsconfig.test.json && node --test .test-build/tests/checkLottoResult.test.js",
     "test:performance": "tsc -p tsconfig.test.json && node --test .test-build/tests/performance-benchmark.test.js"
@@ -76,9 +78,11 @@
     "@tanstack/react-query-devtools": "^5.85.3",
     "@tanstack/react-router-devtools": "^1.131.16",
     "@tanstack/router-plugin": "^1.131.16",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/lodash": "^4.17.20",
-    "@types/node": "^24.3.0",
+    "@types/node": "^24.10.4",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react-swc": "^4.0.0",
@@ -87,11 +91,13 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
+    "jsdom": "^27.4.0",
     "knip": "^5.62.0",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.39.1",
-    "vite": "^7.1.2"
+    "vite": "^7.1.2",
+    "vitest": "^4.0.16"
   }
 }
