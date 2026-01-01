@@ -9,6 +9,8 @@ export function AppLogo() {
       <img
         src='/images/lotto-logo.svg'
         alt='Lotto Simulator'
+        width={36}
+        height={36}
         className='h-9 w-9 rounded-lg border border-white/20 shadow-sm dark:border-white/10'
       />
       <span className='hidden flex-col leading-tight sm:inline-flex'>

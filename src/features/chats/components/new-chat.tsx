@@ -91,6 +91,9 @@ export function NewChat({ users, onOpenChange, open }: NewChatProps) {
                       <img
                         src={user.profile || '/placeholder.svg'}
                         alt={user.fullName}
+                        width={32}
+                        height={32}
+                        loading='lazy'
                         className='h-8 w-8 rounded-full'
                       />
                       <div className='flex flex-col'>

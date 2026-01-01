@@ -54,14 +54,16 @@ export function SignIn2() {
           className='dark:hidden'
           width={1024}
           height={1151}
-          alt='Shadcn-Admin'
+          loading='lazy'
+          alt='Lotto Simulator 대시보드 라이트 모드'
         />
         <img
           src={dashboardDark}
           className='hidden dark:block'
           width={1024}
           height={1138}
-          alt='Shadcn-Admin'
+          loading='lazy'
+          alt='Lotto Simulator 대시보드 다크 모드'
         />
       </div>
     </div>
