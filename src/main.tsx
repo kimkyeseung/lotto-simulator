@@ -34,7 +34,8 @@ const queryClient = new QueryClient({
         )
       },
       refetchOnWindowFocus: import.meta.env.PROD,
-      staleTime: 10 * 1000, // 10s
+      staleTime: 30 * 1000, // 30s
+      gcTime: 5 * 60 * 1000, // 5 minutes
     },
     mutations: {
       onError: (error) => {

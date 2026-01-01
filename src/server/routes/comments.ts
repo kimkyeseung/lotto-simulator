@@ -4,10 +4,11 @@ import { db, comments, users } from '@/db'
 
 export const commentsRoute = new Hono()
 
-// Get all comments with author info
+// Get all comments with author info (optimized - single query)
 commentsRoute.get('/', async (c) => {
   try {
-    const result = await db
+    // Fetch all comments in a single query
+    const allComments = await db
       .select({
         id: comments.id,
         content: comments.content,
@@ -23,36 +24,43 @@ commentsRoute.get('/', async (c) => {
       })
       .from(comments)
       .leftJoin(users, eq(comments.userId, users.id))
-      .where(isNull(comments.parentId)) // Only top-level comments
       .orderBy(desc(comments.createdAt))
 
-    // Get replies for each comment
-    const commentsWithReplies = await Promise.all(
-      result.map(async (comment) => {
-        const replies = await db
-          .select({
-            id: comments.id,
-            content: comments.content,
-            parentId: comments.parentId,
-            createdAt: comments.createdAt,
-            updatedAt: comments.updatedAt,
-            author: {
-              id: users.id,
-              clerkId: users.clerkId,
-              username: users.username,
-              imageUrl: users.imageUrl,
-            },
-          })
-          .from(comments)
-          .leftJoin(users, eq(comments.userId, users.id))
-          .where(eq(comments.parentId, comment.id))
-          .orderBy(comments.createdAt)
+    // Build tree structure in memory
+    type CommentWithReplies = typeof allComments[number] & {
+      likeCount: number
+      replies: CommentWithReplies[]
+    }
 
-        return { ...comment, likeCount: 0, replies: replies.map(r => ({ ...r, likeCount: 0 })) }
-      })
-    )
+    const commentMap = new Map<string, CommentWithReplies>()
+    const topLevelComments: CommentWithReplies[] = []
 
-    return c.json(commentsWithReplies)
+    // First pass: create all comment objects
+    allComments.forEach((comment) => {
+      commentMap.set(comment.id, { ...comment, likeCount: 0, replies: [] })
+    })
+
+    // Second pass: build tree structure
+    allComments.forEach((comment) => {
+      const commentWithReplies = commentMap.get(comment.id)!
+      if (comment.parentId) {
+        const parent = commentMap.get(comment.parentId)
+        if (parent) {
+          parent.replies.push(commentWithReplies)
+        }
+      } else {
+        topLevelComments.push(commentWithReplies)
+      }
+    })
+
+    // Sort replies by createdAt ascending
+    topLevelComments.forEach((comment) => {
+      comment.replies.sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      )
+    })
+
+    return c.json(topLevelComments)
   } catch (error) {
     console.error('Error getting comments:', error)
     return c.json({ error: 'Failed to get comments' }, 500)

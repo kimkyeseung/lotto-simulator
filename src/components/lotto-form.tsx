@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { lottoFormSchema, type LottoFormSchema } from '@/schemas/lotto'
@@ -32,7 +32,7 @@ interface LottoFormProps {
   initialNumbers?: number[]
 }
 
-export function LottoForm({ onFormChange, formName, initialNumbers = [] }: LottoFormProps) {
+export const LottoForm = memo(function LottoForm({ onFormChange, formName, initialNumbers = [] }: LottoFormProps) {
   const form = useForm<LottoFormSchema>({
     resolver: zodResolver(lottoFormSchema),
     defaultValues: {
@@ -149,4 +149,4 @@ export function LottoForm({ onFormChange, formName, initialNumbers = [] }: Lotto
       </div>
     </div>
   )
-}
+})

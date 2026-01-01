@@ -52,13 +52,11 @@ describe('Comments API Routes', () => {
 
   describe('GET /comments', () => {
     it('should return empty array when no comments exist', async () => {
-      // Mock the database to return empty array
+      // Mock the database to return empty array (single query - optimized)
       vi.mocked(db.select).mockReturnValue({
         from: vi.fn().mockReturnValue({
           leftJoin: vi.fn().mockReturnValue({
-            where: vi.fn().mockReturnValue({
-              orderBy: vi.fn().mockResolvedValue([]),
-            }),
+            orderBy: vi.fn().mockResolvedValue([]),
           }),
         }),
       } as unknown as ReturnType<typeof db.select>)
@@ -90,9 +88,7 @@ describe('Comments API Routes', () => {
       vi.mocked(db.select).mockReturnValue({
         from: vi.fn().mockReturnValue({
           leftJoin: vi.fn().mockReturnValue({
-            where: vi.fn().mockReturnValue({
-              orderBy: vi.fn().mockResolvedValue(mockComments),
-            }),
+            orderBy: vi.fn().mockResolvedValue(mockComments),
           }),
         }),
       } as unknown as ReturnType<typeof db.select>)
@@ -105,9 +101,7 @@ describe('Comments API Routes', () => {
       vi.mocked(db.select).mockReturnValue({
         from: vi.fn().mockReturnValue({
           leftJoin: vi.fn().mockReturnValue({
-            where: vi.fn().mockReturnValue({
-              orderBy: vi.fn().mockRejectedValue(new Error('Database error')),
-            }),
+            orderBy: vi.fn().mockRejectedValue(new Error('Database error')),
           }),
         }),
       } as unknown as ReturnType<typeof db.select>)
