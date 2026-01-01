@@ -1,5 +1,5 @@
 import { Outlet } from '@tanstack/react-router'
-import { Monitor, Bell, Palette, Wrench, UserCog } from 'lucide-react'
+import { Monitor, MessageSquare, Palette, Wrench, UserCog } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
@@ -26,9 +26,9 @@ const sidebarNavItems = [
     icon: <Palette size={18} />,
   },
   {
-    title: 'Notifications',
-    href: '/settings/notifications',
-    icon: <Bell size={18} />,
+    title: 'Comments',
+    href: '/settings/comments',
+    icon: <MessageSquare size={18} />,
   },
   {
     title: 'Display',

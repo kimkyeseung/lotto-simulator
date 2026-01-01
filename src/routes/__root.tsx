@@ -8,6 +8,7 @@ import {
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { createPortal } from 'react-dom'
+import { ClerkProvider } from '@clerk/clerk-react'
 import { GoogleAnalytics } from '@/components/google-analytics'
 import { StructuredData } from '@/components/structured-data'
 import { defaultSeo } from '@/utils/seo'
@@ -15,6 +16,8 @@ import { Toaster } from '@/components/ui/sonner'
 import { NavigationProgress } from '@/components/navigation-progress'
 import { GeneralError } from '@/features/errors/general-error'
 import { NotFoundError } from '@/features/errors/not-found-error'
+
+const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
 function HeadManager() {
   const [isMounted, setIsMounted] = useState(false)
@@ -61,7 +64,7 @@ export const Route = createRootRouteWithContext<{
     links: defaultSeo.links ? [...defaultSeo.links] : undefined,
   }),
   component: () => {
-    return (
+    const content = (
       <>
         <HeadManager />
         <StructuredData />
@@ -77,6 +80,22 @@ export const Route = createRootRouteWithContext<{
         )}
       </>
     )
+
+    // Wrap with ClerkProvider if key is available
+    if (CLERK_PUBLISHABLE_KEY) {
+      return (
+        <ClerkProvider
+          publishableKey={CLERK_PUBLISHABLE_KEY}
+          afterSignOutUrl='/sign-in'
+          signInUrl='/sign-in'
+          signUpUrl='/sign-up'
+        >
+          {content}
+        </ClerkProvider>
+      )
+    }
+
+    return content
   },
   notFoundComponent: NotFoundError,
   errorComponent: GeneralError,
