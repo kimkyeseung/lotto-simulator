@@ -27,3 +27,6 @@ dist-ssr
 *.sw?
 
 .claude/
+# bkit plugin state
+docs/.bkit-memory.json
+docs/.pdca-status.json
