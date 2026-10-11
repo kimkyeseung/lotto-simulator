@@ -9,6 +9,6 @@
     "types": ["node"],
     "moduleResolution": "Bundler"
   },
-  "include": ["src/lib/lotto.ts", "tests/**/*.ts"],
+  "include": ["src/lib/lotto.ts", "src/lib/backtest.ts", "tests/**/*.ts"],
   "exclude": ["node_modules"]
 }

@@ -1,4 +1,35 @@
+import { useShallow } from 'zustand/shallow'
 import { useResultStore } from '@/stores/result'
+import { ShareButton } from '@/components/share-button'
+
+export function SimulationShareButton() {
+  const { usedMoney, totalPrize, submittedCount, winningRankCounts } =
+    useResultStore(
+      useShallow((state) => ({
+        usedMoney: state.usedMoney,
+        totalPrize: state.totalPrize,
+        submittedCount: state.submittedCount,
+        winningRankCounts: state.winningRankCounts,
+      }))
+    )
+
+  return (
+    <ShareButton
+      disabled={submittedCount === 0}
+      payload={{
+        v: 1,
+        kind: 'simulation',
+        rounds: submittedCount,
+        games: usedMoney / 1000,
+        spent: usedMoney,
+        prize: totalPrize,
+        ranks: [1, 2, 3, 4, 5].map(
+          (rank) => winningRankCounts[rank as 1 | 2 | 3 | 4 | 5] ?? 0
+        ),
+      }}
+    />
+  )
+}
 
 export function Statistics() {
   const { usedMoney, totalPrize, submittedCount, winningRankCounts } =

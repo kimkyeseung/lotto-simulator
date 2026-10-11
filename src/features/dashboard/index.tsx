@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { useSidebar } from '@/components/ui/sidebar'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -20,14 +21,19 @@ import { MobileKakaoAd } from '@/components/mobile-kakao-ad'
 import { MobileLottoSlipCarousel } from '@/components/mobile-lotto-slip-carousel'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { AutoPurchaseRunner } from './auto-purchase-runner'
+import { HistoryLog } from './history-log'
 import { LottoResult } from './lotto-result'
 import { LuckyNumbers } from './lucky-numbers'
-import { Statistics } from './statistics'
-import { HistoryLog } from './history-log'
-import { Skeleton } from '@/components/ui/skeleton'
+import { SimulationShareButton, Statistics } from './statistics'
 
 const LazyDashboardAnalytics = lazy(() =>
-  import('./analytics').then((module) => ({ default: module.DashboardAnalytics }))
+  import('./analytics').then((module) => ({
+    default: module.DashboardAnalytics,
+  }))
+)
+
+const LazyBacktest = lazy(() =>
+  import('@/features/backtest').then((module) => ({ default: module.Backtest }))
 )
 
 const LazyCharts = lazy(() =>
@@ -54,7 +60,6 @@ export function Dashboard() {
   const formattedNetProfit = `${netProfit >= 0 ? '+' : ''}${netProfit.toLocaleString()} 원`
   const formattedProfitRate = `${profitRate >= 0 ? '+' : ''}${profitRate.toFixed(2)}%`
   const headerOffsetClass = isMobile ? 'mt-[120px]' : undefined
-
 
   return (
     <>
@@ -119,6 +124,7 @@ export function Dashboard() {
             <TabsList>
               <TabsTrigger value='overview'>Overview</TabsTrigger>
               <TabsTrigger value='analytics'>Analytics</TabsTrigger>
+              <TabsTrigger value='backtest'>Backtest</TabsTrigger>
               <TabsTrigger value='log'>Log</TabsTrigger>
             </TabsList>
           </div>
@@ -144,8 +150,9 @@ export function Dashboard() {
               </Card>
 
               <Card className='lg:col-span-3'>
-                <CardHeader>
+                <CardHeader className='flex flex-row items-center justify-between gap-2'>
                   <CardTitle>통계</CardTitle>
+                  <SimulationShareButton />
                 </CardHeader>
 
                 <CardContent>
@@ -157,9 +164,7 @@ export function Dashboard() {
                 <Card className='lg:col-span-5'>
                   <CardHeader>
                     <CardTitle>추천 번호</CardTitle>
-                    <CardDescription>
-                      시뮬레이션 통계 기반 분석
-                    </CardDescription>
+                    <CardDescription>시뮬레이션 통계 기반 분석</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <LuckyNumbers />
@@ -190,6 +195,12 @@ export function Dashboard() {
             </Suspense>
           </TabsContent>
 
+          <TabsContent value='backtest' className='space-y-4'>
+            <Suspense fallback={<AnalyticsFallback />}>
+              {activeTab === 'backtest' && <LazyBacktest />}
+            </Suspense>
+          </TabsContent>
+
           <TabsContent value='log' className='space-y-4'>
             <Card>
               <CardHeader>
@@ -203,7 +214,6 @@ export function Dashboard() {
               </CardContent>
             </Card>
           </TabsContent>
-
         </Tabs>
       </Main>
       {isMobile && <MobileControlPanel />}
