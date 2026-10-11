@@ -1,117 +1,87 @@
-# Shadcn Admin Dashboard
+# Lotto Simulator
 
-Admin Dashboard UI crafted with Shadcn and Vite. Built with responsiveness and accessibility in mind.
+로또 6/45를 직접 사 보지 않고도 "계속 사면 어떻게 될까?"를 확인할 수 있는 웹 시뮬레이터입니다.
+서버나 DB 없이 브라우저에서만 동작하는 정적 웹(SPA)입니다.
 
-![alt text](public/images/shadcn-admin.png)
+**배포:** https://lotto-simulator-three.vercel.app
 
-I've been creating dashboard UIs at work and for my personal projects. I always wanted to make a reusable collection of dashboard UI for future projects; and here it is now. While I've created a few custom components, some of the code is directly adapted from ShadcnUI examples.
+## 주요 기능
 
-> This is not a starter project (template) though. I'll probably make one in the future.
+### 시뮬레이션 (Overview)
 
-## Features
+- A~E 5장의 용지에 번호를 직접 고르거나 비워 두면 자동으로 채워 구매
+- 1회 구매 또는 자동 연속 구매, 등수별 당첨 알림
+- 회차·사용 금액·당첨금·수익률 통계, 번호 히트맵 등 분석(Analytics), 진행 기록(Log)
+- 결과와 선택한 번호는 브라우저(localStorage)에 저장되어 새로고침해도 유지
 
-- Light/dark mode
-- Responsive
-- Accessible
-- With built-in Sidebar component
-- Global search command
-- 10+ pages
-- Extra custom components
-- RTL support
+### 역대 당첨번호 백테스트 (Backtest)
 
-<details>
-<summary>Customized Components (click to expand)</summary>
+실제 1회(2002-12-07)부터 최신 회차까지의 당첨번호와 회차별 실제 당첨금으로
+"매주 이 번호로 샀다면?"을 계산합니다. 기간은 전체 / 최근 10년 / 5년 / 1년 중 선택합니다.
 
-This project uses Shadcn UI components, but some have been slightly modified for better RTL (Right-to-Left) support and other improvements. These customized components differ from the original Shadcn UI versions.
+| 섹션          | 내용                                                                     |
+| ------------- | ------------------------------------------------------------------------ |
+| ① 한눈에 보기 | 1,000원당 회수액, 운 판정, 확률상 기대 당첨금 대비 비율, 최고 성적       |
+| ② 운 분석     | 등수별 실제/기대 횟수, 맞힌 개수 분포, 같은 조건의 무작위 1,000명과 비교 |
+| ③ 시간 흐름   | 첫 당첨, 최장 연속 꽝, 누적 최고점·최대 낙폭, 누적/연도별 손익 차트      |
+| ④ 번호 분석   | 내 번호별 출현 횟수·순위, 1~45 출현 차트, 5개를 맞히고 아깝게 놓친 게임  |
+| ⑤ 용지 비교   | 용지별 당첨금·손익·등수, 고정/반자동/자동 평균 수익률                    |
+| ⑥ 기회비용    | 같은 돈을 적금에 넣었을 때와 비교(연이율 조절), 1등 당첨 확률, 치킨 환산 |
 
-If you want to update components using the Shadcn CLI (e.g., `npx shadcn@latest add <component>`), it's generally safe for non-customized components. For the listed customized ones, you may need to manually merge changes to preserve the project's modifications and avoid overwriting RTL support or other updates.
+계산 기준:
 
-> If you don't require RTL support, you can safely update the 'RTL Updated Components' via the Shadcn CLI, as these changes are primarily for RTL compatibility. The 'Modified Components' may have other customizations to consider.
+- 6개를 고른 용지는 매주 같은 번호, 덜 고른 용지는 매주 나머지를 자동으로 채운 것으로 계산
+- 1게임 가격은 2004-08-01 이전 2,000원, 이후 1,000원
+- 1·2등 당첨자가 없던 회차는 기본 당첨금(1등 20억, 2등 5천만)으로 대신 계산
 
-### Modified Components
+### 결과 공유
 
-- scroll-area
-- sonner
-- separator
+- 시뮬레이션(통계 카드)과 백테스트 결과를 **링크**(`/share#...`) 또는 **이미지**(1080×1080 PNG)로 공유
+- 모바일에서는 공유 시트, 데스크톱에서는 클립보드 복사/파일 저장
+- 정적 사이트라 링크 미리보기(OG)는 결과와 관계없이 기본 이미지로 표시
 
-### RTL Updated Components
+## 기술 스택
 
-- alert-dialog
-- calendar
-- command
-- dialog
-- dropdown-menu
-- select
-- table
-- sheet
-- sidebar
-- switch
+React 19 · TypeScript · Vite 7 · TanStack Router/Query · Zustand · Shadcn UI(Tailwind CSS 4, Radix UI) · Recharts
 
-**Notes:**
+[Shadcn Admin](https://github.com/satnaing/shadcn-admin) 대시보드 템플릿을 기반으로 만들었습니다.
 
-- **Modified Components**: These have general updates, potentially including RTL adjustments.
-- **RTL Updated Components**: These have specific changes for RTL language support (e.g., layout, positioning).
-- For implementation details, check the source files in `src/components/ui/`.
-- All other Shadcn UI components in the project are standard and can be safely updated via the CLI.
+## 로컬 실행
 
-</details>
-
-## Tech Stack
-
-**UI:** [ShadcnUI](https://ui.shadcn.com) (TailwindCSS + RadixUI)
-
-**Build Tool:** [Vite](https://vitejs.dev/)
-
-**Routing:** [TanStack Router](https://tanstack.com/router/latest)
-
-**Type Checking:** [TypeScript](https://www.typescriptlang.org/)
-
-**Linting/Formatting:** [Eslint](https://eslint.org/) & [Prettier](https://prettier.io/)
-
-**Icons:** [Lucide Icons](https://lucide.dev/icons/), [Tabler Icons](https://tabler.io/icons) (Brand icons only)
-
-**Auth (partial):** [Clerk](https://go.clerk.com/GttUAaK)
-
-## Run Locally
-
-Clone the project
+Node.js 22 이상이 필요합니다.
 
 ```bash
-  git clone https://github.com/satnaing/shadcn-admin.git
+npm install
+npm run dev
 ```
 
-Go to the project directory
+| 명령어                 | 설명                                          |
+| ---------------------- | --------------------------------------------- |
+| `npm run dev`          | 개발 서버 실행                                |
+| `npm run build`        | 타입 체크 후 프로덕션 빌드 (`dist/`)          |
+| `npm test`             | 로또·백테스트 로직 테스트 (`node --test`)     |
+| `npm run lint`         | ESLint                                        |
+| `npm run format:check` | Prettier 검사                                 |
+| `npm run fetch-draws`  | 역대 당첨번호 갱신 (`public/data/draws.json`) |
 
-```bash
-  cd shadcn-admin
-```
+## 당첨번호 데이터
 
-Install dependencies
+- `scripts/fetch-draws.mjs`가 동행복권 홈페이지 내부 API에서 당첨번호와 회차별 당첨금을 받아
+  `public/data/draws.json`에 저장합니다. 마지막 회차 이후만 이어받고, 최근 10회는 매번 다시 검증합니다.
+- `.github/workflows/update-draws.yml`이 매주 토요일 23시, 일요일 9시(KST)에 실행되어 새 회차를 main에 커밋합니다.
+  수동 실행은 GitHub Actions의 **Update Lotto Draws → Run workflow**에서 할 수 있습니다.
+- 공식 공개 API가 아니므로 응답 형식이 바뀌면 스크립트가 검증 단계에서 실패하고, 잘못된 데이터는 저장되지 않습니다.
 
-```bash
-  pnpm install
-```
+## 환경 변수
 
-Start the server
+모두 선택 사항입니다. `.env.example`을 참고하세요.
 
-```bash
-  pnpm run dev
-```
+| 변수                            | 설명                     |
+| ------------------------------- | ------------------------ |
+| `VITE_GA_MEASUREMENT_ID`        | Google Analytics         |
+| `VITE_KAKAO_AD_UNIT`            | 카카오 애드핏 (데스크톱) |
+| `VITE_KAKAO_AD_UNIT_FOR_MOBILE` | 카카오 애드핏 (모바일)   |
 
-## Sponsoring this project ❤️
+## 라이선스
 
-If you find this project helpful or use this in your own work, consider [sponsoring me](https://github.com/sponsors/satnaing) to support development and maintenance. You can [buy me a coffee](https://buymeacoffee.com/satnaing) as well. Don’t worry, every penny helps. Thank you! 🙏
-
-For questions or sponsorship inquiries, feel free to reach out at [contact@satnaing.dev](mailto:contact@satnaing.dev).
-
-### Current Sponsor
-
-- [Clerk](https://go.clerk.com/GttUAaK) - for backing the implementation of Clerk in this project
-
-## Author
-
-Crafted with 🤍 by [@satnaing](https://github.com/satnaing)
-
-## License
-
-Licensed under the [MIT License](https://choosealicense.com/licenses/mit/)
+[MIT](LICENSE)

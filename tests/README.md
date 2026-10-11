@@ -12,6 +12,17 @@
 2. `normalizeAndCompleteLottoNumbers` - 사용자 입력 번호 정규화 및 완성
 3. `checkLottoResult` - 당첨 결과 확인
 
+### `backtest.test.ts`
+역대 회차 백테스트와 리포트 계산 로직 테스트
+
+**테스트 대상:**
+- `src/lib/backtest.ts` - 구매액(가격 인하 반영), 실제/대체 당첨금, 최고 성적, 맞힌 개수 분포, 기대 당첨금, 첫 당첨·연속 꽝·최고점·낙폭, 연도/용지별 집계, 아깝게 놓친 게임
+- `src/lib/lotto-odds.ts` - 등수별 확률, 맞힌 개수 확률 합
+- `src/lib/backtest-insights.ts` - 번호 출현 횟수, 적금 잔액, 백분위, 히스토그램(극단값 제외), 무작위 플레이어 시뮬레이션
+
+### `performance-benchmark.test.ts`
+번호 생성 성능 벤치마크 (결과를 콘솔에 출력)
+
 ### `checkLottoResult.test.ts`
 `checkLottoResult` 함수에 대한 기본 테스트 (레거시)
 
@@ -29,7 +40,12 @@ npm run test:lotto
 
 # checkLottoResult만 테스트
 npm run test:check-result
+
+# 성능 벤치마크
+npm run test:performance
 ```
+
+새 파일을 테스트하려면 `tsconfig.test.json`의 `include`에 추가하고, 테스트 대상 파일 간 상대 import에는 `.js` 확장자를 붙여야 합니다.
 
 ## 📊 테스트 커버리지
 
