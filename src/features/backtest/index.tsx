@@ -1,20 +1,11 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { RefreshCw } from 'lucide-react'
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
 import { useShallow } from 'zustand/shallow'
 import { useConfigStore } from '@/stores/config'
 import { useFormStore } from '@/stores/form'
 import { type DrawsFile, runBacktest } from '@/lib/backtest'
-import { cn } from '@/lib/utils'
+import { getPercentile } from '@/lib/backtest-insights'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -27,6 +18,10 @@ import { NumberBall } from '@/components/ui/number-ball'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ShareButton } from '@/components/share-button'
+import { LuckSection } from './components/luck-section'
+import { SummarySection } from './components/summary-section'
+import { TimelineSection } from './components/timeline-section'
+import { useLuckSimulation } from './use-luck-simulation'
 
 const RANGES = [
   { value: 'all', label: '전체', years: null },
@@ -88,6 +83,15 @@ export function Backtest() {
     [draws, tickets, prizeMap, runId]
   )
 
+  const luck = useLuckSimulation(draws, tickets.length, prizeMap)
+  const percentile = useMemo(
+    () =>
+      result && luck.netProfits
+        ? getPercentile(luck.netProfits, result.netProfit)
+        : null,
+    [result, luck.netProfits]
+  )
+
   const hasAutoTicket = tickets.some((ticket) => ticket.numbers.length < 6)
   const firstDraw = draws[0]
   const lastDraw = draws[draws.length - 1]
@@ -109,7 +113,7 @@ export function Backtest() {
   }
 
   return (
-    <div className='space-y-4'>
+    <div className='space-y-8'>
       <Card>
         <CardHeader className='flex flex-row flex-wrap items-start justify-between gap-4'>
           <div className='space-y-1.5'>
@@ -167,86 +171,13 @@ export function Backtest() {
 
       {result ? (
         <>
-          <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-            <SummaryCard
-              label='순손익'
-              value={`${result.netProfit >= 0 ? '+' : ''}${result.netProfit.toLocaleString()}원`}
-              accent={result.netProfit >= 0}
-            />
-            <SummaryCard
-              label='수익률'
-              value={`${result.profitRate >= 0 ? '+' : ''}${result.profitRate.toFixed(1)}%`}
-              accent={result.profitRate >= 0}
-            />
-            <SummaryCard
-              label='총 구매액'
-              value={`${result.spent.toLocaleString()}원`}
-              hint={`${result.gameCount.toLocaleString()}게임`}
-            />
-            <SummaryCard
-              label='총 당첨금'
-              value={`${result.prize.toLocaleString()}원`}
-            />
-          </div>
-
-          <div className='grid gap-4 lg:grid-cols-12'>
-            <Card className='lg:col-span-8'>
-              <CardHeader>
-                <CardTitle>누적 손익</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ProfitChart timeline={result.timeline} />
-              </CardContent>
-            </Card>
-            <Card className='lg:col-span-4'>
-              <CardHeader>
-                <CardTitle>당첨 기록</CardTitle>
-              </CardHeader>
-              <CardContent className='space-y-4'>
-                <div className='space-y-1.5'>
-                  {PRIZE_RANKS.map((rank) => (
-                    <div
-                      key={rank}
-                      className='flex items-center justify-between text-sm'
-                    >
-                      <span>{rank}등</span>
-                      <span className='font-medium tabular-nums'>
-                        {result.rankCounts[rank].toLocaleString()} 회
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                {result.best ? (
-                  <div className='space-y-2 rounded-md border p-3'>
-                    <p className='text-sm font-medium'>
-                      최고 성적: {result.best.rank}등 · {result.best.drawNo}회
-                      <span className='text-muted-foreground'>
-                        {' '}
-                        ({result.best.date})
-                      </span>
-                    </p>
-                    <div className='flex flex-wrap gap-1'>
-                      {result.best.ticket.map((number) => (
-                        <NumberBall
-                          key={number}
-                          isSmall
-                          isDeactivated={
-                            !result.best?.matchedNumbers.includes(number)
-                          }
-                        >
-                          {number}
-                        </NumberBall>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <p className='text-muted-foreground text-sm'>
-                    이 기간에는 한 번도 당첨되지 않았어요.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+          <SummarySection result={result} percentile={percentile} />
+          <LuckSection
+            result={result}
+            randomNetProfits={luck.netProfits}
+            isSimulationFailed={luck.status === 'error'}
+          />
+          <TimelineSection result={result} />
         </>
       ) : (
         <Card>
@@ -297,87 +228,6 @@ function TicketSummary({
         </div>
       ))}
     </div>
-  )
-}
-
-function SummaryCard({
-  label,
-  value,
-  hint,
-  accent,
-}: {
-  label: string
-  value: string
-  hint?: string
-  accent?: boolean
-}) {
-  return (
-    <Card>
-      <CardContent className='space-y-1'>
-        <p className='text-muted-foreground text-sm'>{label}</p>
-        <p
-          className={cn(
-            'text-2xl font-semibold tabular-nums',
-            accent === true && 'text-emerald-500',
-            accent === false && 'text-destructive'
-          )}
-        >
-          {value}
-        </p>
-        {hint && <p className='text-muted-foreground text-xs'>{hint}</p>}
-      </CardContent>
-    </Card>
-  )
-}
-
-function ProfitChart({
-  timeline,
-}: {
-  timeline: { no: number; date: string; netProfit: number }[]
-}) {
-  return (
-    <ResponsiveContainer width='100%' height={260}>
-      <AreaChart data={timeline} margin={{ left: 8, right: 8 }}>
-        <CartesianGrid strokeDasharray='3 3' className='stroke-muted' />
-        <XAxis
-          dataKey='no'
-          tickFormatter={(no) => `${no}회`}
-          tick={{ fontSize: 12 }}
-          minTickGap={40}
-        />
-        <YAxis
-          tickFormatter={(value: number) =>
-            `${Math.round(value / 10_000).toLocaleString()}만`
-          }
-          tick={{ fontSize: 12 }}
-          width={64}
-        />
-        <Tooltip
-          formatter={(value: number) => [
-            `${value.toLocaleString()}원`,
-            '누적 손익',
-          ]}
-          labelFormatter={(no, payload) =>
-            `${no}회 (${payload?.[0]?.payload?.date ?? ''})`
-          }
-          contentStyle={{
-            background: 'var(--popover)',
-            border: '1px solid var(--border)',
-            borderRadius: 8,
-            color: 'var(--popover-foreground)',
-          }}
-        />
-        <Area
-          type='monotone'
-          dataKey='netProfit'
-          stroke='var(--chart-1)'
-          fill='var(--chart-1)'
-          fillOpacity={0.15}
-          strokeWidth={2}
-          isAnimationActive={false}
-        />
-      </AreaChart>
-    </ResponsiveContainer>
   )
 }
 
