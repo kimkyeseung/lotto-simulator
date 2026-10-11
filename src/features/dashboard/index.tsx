@@ -25,7 +25,6 @@ import { LuckyNumbers } from './lucky-numbers'
 import { Statistics } from './statistics'
 import { HistoryLog } from './history-log'
 import { Skeleton } from '@/components/ui/skeleton'
-import { CommentList } from '@/features/comments'
 
 const LazyDashboardAnalytics = lazy(() =>
   import('./analytics').then((module) => ({ default: module.DashboardAnalytics }))
@@ -121,7 +120,6 @@ export function Dashboard() {
               <TabsTrigger value='overview'>Overview</TabsTrigger>
               <TabsTrigger value='analytics'>Analytics</TabsTrigger>
               <TabsTrigger value='log'>Log</TabsTrigger>
-              <TabsTrigger value='comments'>Comments</TabsTrigger>
             </TabsList>
           </div>
           <TabsContent value='overview' className='space-y-4'>
@@ -206,19 +204,6 @@ export function Dashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value='comments' className='space-y-4'>
-            <Card>
-              <CardHeader>
-                <CardTitle>커뮤니티</CardTitle>
-                <CardDescription>
-                  다른 사용자들과 의견을 나눠보세요
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <CommentList />
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </Main>
       {isMobile && <MobileControlPanel />}
