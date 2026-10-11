@@ -4,8 +4,8 @@ import { cn } from '@/lib/utils'
 import { LayoutProvider } from '@/context/layout-provider'
 import { SearchProvider } from '@/context/search-provider'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
-import { SkipToMain } from '@/components/skip-to-main'
 import { KakaoAd } from '@/components/kakao-ad'
+import { SkipToMain } from '@/components/skip-to-main'
 
 type AuthenticatedLayoutProps = {
   children?: React.ReactNode
@@ -40,13 +40,13 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
             </SidebarInset>
 
             {/* 데스크톱에서만 사이드 광고 표시 */}
-            <aside className='hidden xl:block w-[320px] border-l p-4 overflow-y-auto h-svh sticky top-0'>
+            <aside className='sticky top-0 hidden h-svh w-[320px] overflow-y-auto border-l p-4 xl:block'>
               {kakaoAdUnit ? (
                 <div className='space-y-4'>
                   <KakaoAd unitId={kakaoAdUnit} width={300} height={250} />
                 </div>
               ) : (
-                <div className='text-muted-foreground text-sm text-center p-4'>
+                <div className='text-muted-foreground p-4 text-center text-sm'>
                   광고 영역
                 </div>
               )}

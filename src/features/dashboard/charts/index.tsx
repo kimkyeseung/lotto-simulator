@@ -35,7 +35,9 @@ const SERIES = [
 
 export function Charts() {
   const numberStatsMap = useResultStore((state) => state.numberStatsMap)
-  const [activeKeys, setActiveKeys] = useState<string[]>(SERIES.map((series) => series.key))
+  const [activeKeys, setActiveKeys] = useState<string[]>(
+    SERIES.map((series) => series.key)
+  )
   const [isDark, setIsDark] = useState(false)
 
   useEffect(() => {
@@ -75,7 +77,7 @@ export function Charts() {
     <div className='space-y-4'>
       <div className='flex flex-wrap items-center justify-between gap-3'>
         <div>
-          <p className='text-muted-foreground text-xs uppercase tracking-wide'>
+          <p className='text-muted-foreground text-xs tracking-wide uppercase'>
             번호별 빈도 비교
           </p>
           <h3 className='text-base font-semibold'>구매 · 추첨 · 적중 통계</h3>
@@ -102,7 +104,9 @@ export function Charts() {
                 <span
                   className='inline-block size-2.5 rounded-full'
                   style={{
-                    backgroundColor: isDark ? series.darkColor : series.lightColor
+                    backgroundColor: isDark
+                      ? series.darkColor
+                      : series.lightColor,
                   }}
                   aria-hidden='true'
                 />
@@ -115,7 +119,11 @@ export function Charts() {
 
       {hasChartData ? (
         <ResponsiveContainer width='100%' height={360}>
-          <BarChart data={data} barGap={2} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+          <BarChart
+            data={data}
+            barGap={2}
+            margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
+          >
             <CartesianGrid
               strokeDasharray='3 3'
               stroke='hsl(var(--border))'
@@ -142,16 +150,18 @@ export function Charts() {
               content={CustomTooltip}
               cursor={{ fill: 'hsl(var(--muted) / 0.5)', radius: 4 }}
             />
-            {SERIES.filter((series) => activeKeys.includes(series.key)).map((series) => (
-              <Bar
-                key={series.key}
-                dataKey={series.key}
-                fill={isDark ? series.darkColor : series.lightColor}
-                isAnimationActive={false}
-                radius={[4, 4, 0, 0]}
-                maxBarSize={18}
-              />
-            ))}
+            {SERIES.filter((series) => activeKeys.includes(series.key)).map(
+              (series) => (
+                <Bar
+                  key={series.key}
+                  dataKey={series.key}
+                  fill={isDark ? series.darkColor : series.lightColor}
+                  isAnimationActive={false}
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={18}
+                />
+              )
+            )}
           </BarChart>
         </ResponsiveContainer>
       ) : (
@@ -163,7 +173,7 @@ export function Charts() {
 
 function EmptyState() {
   return (
-    <div className='border border-dashed border-muted-foreground/40 rounded-lg p-6 text-center text-sm text-muted-foreground'>
+    <div className='border-muted-foreground/40 text-muted-foreground rounded-lg border border-dashed p-6 text-center text-sm'>
       아직 시뮬레이션 데이터가 없습니다. 티켓을 구매해 통계를 확인해보세요.
     </div>
   )

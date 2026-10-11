@@ -15,7 +15,10 @@ export function useInView<T extends HTMLElement>(
     const element = targetRef.current
     if (!element || isInView) return
 
-    if (typeof window === 'undefined' || typeof IntersectionObserver === 'undefined') {
+    if (
+      typeof window === 'undefined' ||
+      typeof IntersectionObserver === 'undefined'
+    ) {
       setIsInView(true)
       return
     }

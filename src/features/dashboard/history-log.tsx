@@ -1,7 +1,7 @@
-import { useResultStore } from '@/stores/result'
-import { useShallow } from 'zustand/shallow'
-import { cn } from '@/lib/utils'
 import type { WinningRank } from '@/types/lotto'
+import { useShallow } from 'zustand/shallow'
+import { useResultStore } from '@/stores/result'
+import { cn } from '@/lib/utils'
 
 function WinningRankBadge({ rank }: { rank: WinningRank }) {
   if (rank === 0) {
@@ -19,7 +19,7 @@ function WinningRankBadge({ rank }: { rank: WinningRank }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded',
+        'inline-flex h-5 w-5 items-center justify-center rounded text-xs font-bold',
         rankColors[rank as keyof typeof rankColors]
       )}
     >
@@ -29,17 +29,15 @@ function WinningRankBadge({ rank }: { rank: WinningRank }) {
 }
 
 export function HistoryLog() {
-  const history = useResultStore(
-    useShallow((state) => state.history)
-  )
+  const history = useResultStore(useShallow((state) => state.history))
 
   if (history.length === 0) {
     return (
-      <div className='text-center py-12'>
+      <div className='py-12 text-center'>
         <p className='text-muted-foreground text-sm'>
           아직 시뮬레이션 히스토리가 없습니다.
         </p>
-        <p className='text-muted-foreground text-xs mt-2'>
+        <p className='text-muted-foreground mt-2 text-xs'>
           로또를 구매하면 각 회차별 결과가 여기에 기록됩니다.
         </p>
       </div>
@@ -51,7 +49,7 @@ export function HistoryLog() {
 
   return (
     <div className='space-y-2'>
-      <div className='grid grid-cols-7 gap-2 px-4 py-2 text-xs font-medium text-muted-foreground border-b'>
+      <div className='text-muted-foreground grid grid-cols-7 gap-2 border-b px-4 py-2 text-xs font-medium'>
         <div>회차</div>
         <div className='text-right'>사용 금액</div>
         <div className='text-right'>당첨 금액</div>
@@ -60,7 +58,7 @@ export function HistoryLog() {
         <div>당첨 결과</div>
         <div className='text-right'>시간</div>
       </div>
-      <div className='max-h-[600px] overflow-y-auto space-y-1'>
+      <div className='max-h-[600px] space-y-1 overflow-y-auto'>
         {sortedHistory.map((entry) => {
           const isProfit = entry.netProfit >= 0
           const profitColor = isProfit ? 'text-emerald-500' : 'text-destructive'
@@ -68,29 +66,39 @@ export function HistoryLog() {
           return (
             <div
               key={entry.id}
-              className='grid grid-cols-7 gap-2 px-4 py-3 text-sm rounded-lg hover:bg-accent transition-colors'
+              className='hover:bg-accent grid grid-cols-7 gap-2 rounded-lg px-4 py-3 text-sm transition-colors'
             >
-              <div className='font-medium'>
-                #{entry.submittedCount}
-              </div>
+              <div className='font-medium'>#{entry.submittedCount}</div>
               <div className='text-right tabular-nums'>
                 {entry.usedMoney.toLocaleString()}원
               </div>
               <div className='text-right tabular-nums'>
                 {entry.totalPrize.toLocaleString()}원
               </div>
-              <div className={cn('text-right tabular-nums font-medium', profitColor)}>
-                {isProfit ? '+' : ''}{entry.netProfit.toLocaleString()}원
+              <div
+                className={cn(
+                  'text-right font-medium tabular-nums',
+                  profitColor
+                )}
+              >
+                {isProfit ? '+' : ''}
+                {entry.netProfit.toLocaleString()}원
               </div>
-              <div className={cn('text-right tabular-nums font-medium', profitColor)}>
-                {isProfit ? '+' : ''}{entry.profitRate.toFixed(2)}%
+              <div
+                className={cn(
+                  'text-right font-medium tabular-nums',
+                  profitColor
+                )}
+              >
+                {isProfit ? '+' : ''}
+                {entry.profitRate.toFixed(2)}%
               </div>
-              <div className='flex gap-1 items-center'>
+              <div className='flex items-center gap-1'>
                 {entry.winningRanks?.map((rank, idx) => (
                   <WinningRankBadge key={idx} rank={rank} />
                 )) || '-'}
               </div>
-              <div className='text-right text-xs text-muted-foreground'>
+              <div className='text-muted-foreground text-right text-xs'>
                 {new Date(entry.timestamp).toLocaleTimeString('ko-KR', {
                   hour: '2-digit',
                   minute: '2-digit',
@@ -101,7 +109,7 @@ export function HistoryLog() {
           )
         })}
       </div>
-      <div className='pt-2 border-t text-xs text-muted-foreground text-center'>
+      <div className='text-muted-foreground border-t pt-2 text-center text-xs'>
         총 {history.length}개의 기록
       </div>
     </div>

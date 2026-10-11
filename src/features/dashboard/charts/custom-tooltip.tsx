@@ -58,9 +58,7 @@ export function CustomTooltip({
             <p>{p.value}회</p>
           </div>
         ))}
-        {submittedCount > 0 && (
-          <div className='mt-1'>적중률: {hitRate}%</div>
-        )}
+        {submittedCount > 0 && <div className='mt-1'>적중률: {hitRate}%</div>}
       </CardContent>
     </Card>
   )

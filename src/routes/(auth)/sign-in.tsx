@@ -11,7 +11,8 @@ export const Route = createFileRoute('/(auth)/sign-in')({
   head: () =>
     buildSeo({
       title: '로그인 | Lotto Simulator',
-      description: 'Lotto Simulator 계정으로 로그인하고 로또 시뮬레이션 기록을 관리하세요.',
+      description:
+        'Lotto Simulator 계정으로 로그인하고 로또 시뮬레이션 기록을 관리하세요.',
       path: '/sign-in',
       noIndex: true,
     }),

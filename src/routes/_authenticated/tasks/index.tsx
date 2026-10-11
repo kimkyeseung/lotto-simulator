@@ -22,7 +22,8 @@ export const Route = createFileRoute('/_authenticated/tasks/')({
   head: () =>
     buildSeo({
       title: '로또 작업 관리 | Lotto Simulator',
-      description: '티켓 제출과 당첨 확인 작업을 한곳에서 관리하고 상태를 추적하세요.',
+      description:
+        '티켓 제출과 당첨 확인 작업을 한곳에서 관리하고 상태를 추적하세요.',
       path: '/_authenticated/tasks/',
       keywords: ['로또 작업 관리', '로또 업무 현황'],
       noIndex: true,

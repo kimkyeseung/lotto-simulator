@@ -35,7 +35,7 @@ export function LuckyNumbers() {
 
   if (!hasData) {
     return (
-      <div className='space-y-6 text-center text-sm text-muted-foreground'>
+      <div className='text-muted-foreground space-y-6 text-center text-sm'>
         <p>시뮬레이션 데이터가 충분하지 않습니다.</p>
         <p>티켓을 구매하면 행운의 숫자를 확인할 수 있습니다.</p>
       </div>
@@ -47,18 +47,16 @@ export function LuckyNumbers() {
       {/* 행운의 숫자 */}
       <div className='space-y-3'>
         <div>
-          <h3 className='text-sm font-semibold text-foreground'>
+          <h3 className='text-foreground text-sm font-semibold'>
             🍀 행운의 숫자
           </h3>
-          <p className='text-xs text-muted-foreground'>
-            적중률이 높은 숫자들
-          </p>
+          <p className='text-muted-foreground text-xs'>적중률이 높은 숫자들</p>
         </div>
         <div className='flex flex-wrap gap-2'>
           {luckyNumbers.map((item) => (
             <div key={item.number} className='flex flex-col items-center gap-1'>
               <NumberBall>{item.number}</NumberBall>
-              <span className='text-xs text-muted-foreground'>
+              <span className='text-muted-foreground text-xs'>
                 {item.hitRate.toFixed(1)}%
               </span>
             </div>
@@ -69,18 +67,16 @@ export function LuckyNumbers() {
       {/* 불운의 숫자 */}
       <div className='space-y-3'>
         <div>
-          <h3 className='text-sm font-semibold text-foreground'>
+          <h3 className='text-foreground text-sm font-semibold'>
             😔 피해야 할 숫자
           </h3>
-          <p className='text-xs text-muted-foreground'>
-            적중률이 낮은 숫자들
-          </p>
+          <p className='text-muted-foreground text-xs'>적중률이 낮은 숫자들</p>
         </div>
         <div className='flex flex-wrap gap-2'>
           {unluckyNumbers.map((item) => (
             <div key={item.number} className='flex flex-col items-center gap-1'>
               <NumberBall>{item.number}</NumberBall>
-              <span className='text-xs text-muted-foreground'>
+              <span className='text-muted-foreground text-xs'>
                 {item.hitRate.toFixed(1)}%
               </span>
             </div>

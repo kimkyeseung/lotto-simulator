@@ -30,7 +30,11 @@ export const resultPalette: HeatmapPalette = {
   high: 'bg-amber-600 text-white',
 }
 
-export const getIntensityClass = (count: number, maxCount: number, palette: HeatmapPalette) => {
+export const getIntensityClass = (
+  count: number,
+  maxCount: number,
+  palette: HeatmapPalette
+) => {
   if (maxCount === 0) return palette.zero
   const ratio = count / maxCount
   if (ratio > 0.75) return palette.high

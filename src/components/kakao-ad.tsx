@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-
 import { cn } from '@/lib/utils'
 
 declare global {
@@ -18,12 +17,7 @@ interface KakaoAdProps {
 const KAKAO_SCRIPT_ID = 'kakao-ad-script'
 const KAKAO_SCRIPT_SRC = 'https://t1.daumcdn.net/kas/static/ba.min.js'
 
-export function KakaoAd({
-  unitId,
-  width,
-  height,
-  className,
-}: KakaoAdProps) {
+export function KakaoAd({ unitId, width, height, className }: KakaoAdProps) {
   useEffect(() => {
     const existingScript = document.getElementById(
       KAKAO_SCRIPT_ID
@@ -57,4 +51,3 @@ export function KakaoAd({
     />
   )
 }
-

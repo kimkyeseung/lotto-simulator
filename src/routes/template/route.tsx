@@ -1,9 +1,9 @@
 import { Outlet, createFileRoute } from '@tanstack/react-router'
-import { buildSeo } from '@/utils/seo'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { getCookie } from '@/lib/cookies'
 import { cn } from '@/lib/utils'
+import { buildSeo } from '@/utils/seo'
 import { LayoutProvider } from '@/context/layout-provider'
 import { SearchProvider } from '@/context/search-provider'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
@@ -14,7 +14,8 @@ export const Route = createFileRoute('/template')({
   head: () =>
     buildSeo({
       title: '레이아웃 템플릿 | Lotto Simulator',
-      description: '앱 사이드바와 레이아웃 구성을 테스트하기 위한 템플릿 페이지입니다.',
+      description:
+        '앱 사이드바와 레이아웃 구성을 테스트하기 위한 템플릿 페이지입니다.',
       path: '/template',
       noIndex: true,
     }),

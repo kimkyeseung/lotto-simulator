@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router'
-import { buildSeo } from '@/utils/seo'
 import { ClerkProvider } from '@clerk/clerk-react'
 import { ExternalLink, Key } from 'lucide-react'
+import { buildSeo } from '@/utils/seo'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'

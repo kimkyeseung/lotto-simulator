@@ -54,7 +54,8 @@ export const LottoForm = memo(function LottoForm({
   const submittedTickets = useResultStore((state) => state.submittedTickets)
   const [submittedNumbers, setSubmittedNumbers] = useState<number[]>([])
   // 사용자가 수동으로 선택한 번호만 별도 관리 (초기값은 props에서)
-  const [manuallySelectedNumbers, setManuallySelectedNumbers] = useState<number[]>(initialNumbers)
+  const [manuallySelectedNumbers, setManuallySelectedNumbers] =
+    useState<number[]>(initialNumbers)
 
   // 폼 필드 값이 변경될 때마다 상위 컴포넌트로 전달
   useEffect(() => {
@@ -89,13 +90,13 @@ export const LottoForm = memo(function LottoForm({
   }
 
   return (
-    <div className='flex flex-col overflow-hidden rounded-lg border bg-card shadow-sm'>
-      <div className='flex justify-center bg-muted text-xs text-muted-foreground font-medium'>
+    <div className='bg-card flex flex-col overflow-hidden rounded-lg border shadow-sm'>
+      <div className='bg-muted text-muted-foreground flex justify-center text-xs font-medium'>
         {formName}
       </div>
       <div className='space-y-4 p-2 md:p-4'>
         <div className='flex items-center justify-end gap-2'>
-          <label className='text-sm text-foreground'>사용</label>
+          <label className='text-foreground text-sm'>사용</label>
           <Switch
             checked={isEnabled}
             onCheckedChange={(value) => {
@@ -116,7 +117,11 @@ export const LottoForm = memo(function LottoForm({
                 key={number}
                 type='button'
                 onClick={() => handleNumberClick(number)}
-                className={numberButtonClass(isManuallySelected, !isEnabled, isSubmittedOnly)}
+                className={numberButtonClass(
+                  isManuallySelected,
+                  !isEnabled,
+                  isSubmittedOnly
+                )}
                 disabled={
                   !isEnabled ||
                   (!manuallySelectedNumbers.includes(number) &&
@@ -147,7 +152,7 @@ export const LottoForm = memo(function LottoForm({
           </div>
         )}
         {isEnabled && (
-          <div className='text-sm text-muted-foreground'>
+          <div className='text-muted-foreground text-sm'>
             {manuallySelectedNumbers.length !== 6 &&
               `${6 - manuallySelectedNumbers.length}개의 번호가 자동으로 선택`}
           </div>

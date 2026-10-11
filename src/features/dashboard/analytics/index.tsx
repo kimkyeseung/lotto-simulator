@@ -1,9 +1,9 @@
-import { RealtimeProgress } from './realtime-progress'
-import { RevenueSummary } from './revenue-summary'
-import { RankDistributionChart } from './rank-distribution-chart'
 import { NumberFrequencyHeatmap } from './number-frequency-heatmap'
 import { NumberHitFrequencyHeatmap } from './number-hit-frequency-heatmap'
+import { RankDistributionChart } from './rank-distribution-chart'
+import { RealtimeProgress } from './realtime-progress'
 import { RecommendedNumbersHeatmap } from './recommended-numbers-heatmap'
+import { RevenueSummary } from './revenue-summary'
 
 export function DashboardAnalytics() {
   return (
