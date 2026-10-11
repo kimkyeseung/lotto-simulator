@@ -1,13 +1,12 @@
 import { Play, Pause, RefreshCw } from 'lucide-react'
 import { useConfigStore } from '@/stores/config'
-import { useResultStore } from '@/stores/result'
 import { useLotto } from '@/hooks/use-lotto'
 import { Button } from '@/components/ui/button'
+import { ResetResultsButton } from '@/components/reset-results-button'
 
 export function Controller() {
   const { onSubmit, isSubmitDisabled } = useLotto()
   const { isAutoRunning, toggleAutoRun } = useConfigStore()
-  const initialize = useResultStore((state) => state.initialize)
 
   return (
     <div className='flex items-center space-x-2'>
@@ -18,9 +17,9 @@ export function Controller() {
       >
         {isAutoRunning ? '자동 구매 진행 중...' : '1회 구매하기'}
       </Button>
-      <Button size={'icon'} onClick={initialize}>
+      <ResetResultsButton size={'icon'} aria-label='결과 초기화'>
         <RefreshCw className='size-4' />
-      </Button>
+      </ResetResultsButton>
       <Button size={'icon'} onClick={toggleAutoRun}>
         {isAutoRunning ? (
           <Pause className='size-4' />

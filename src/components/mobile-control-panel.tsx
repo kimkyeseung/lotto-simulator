@@ -3,6 +3,7 @@ import { useConfigStore } from '@/stores/config'
 import { useResultStore } from '@/stores/result'
 import { cn } from '@/lib/utils'
 import { useLotto } from '@/hooks/use-lotto'
+import { ResetResultsButton } from './reset-results-button'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 
@@ -15,7 +16,6 @@ export function MobileControlPanel() {
   } = useLotto()
   const { isAutoRunning, toggleAutoRun } = useConfigStore()
   const { submittedCount } = useResultStore()
-  const initialize = useResultStore((state) => state.initialize)
   const canRun = true
 
   return (
@@ -52,16 +52,15 @@ export function MobileControlPanel() {
 
         {/* Control Buttons */}
         <div className='grid grid-cols-3 gap-2'>
-          <Button
+          <ResetResultsButton
             size='lg'
             variant='outline'
-            onClick={initialize}
             disabled={submittedCount === 0 || isAutoRunning || isSubmitDisabled}
             className='h-12'
           >
             <RotateCcw className='mr-1 h-4 w-4' />
             초기화
-          </Button>
+          </ResetResultsButton>
 
           <Button
             size='lg'

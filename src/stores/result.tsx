@@ -2,6 +2,7 @@ import { type LottoFormSchema, type LottoSchema } from '@/schemas/lotto'
 import { type NumberStatsMap, type WinningRank } from '@/types/lotto'
 import { toast } from 'sonner'
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import {
   checkLottoResult,
   generateLottoNumbers,
@@ -11,6 +12,7 @@ import {
   updateNumberStats,
   updateWinningNumberStats,
 } from '@/lib/lotto-submission'
+import { STORAGE_KEY_PREFIX, throttledStorage } from '@/lib/persist-storage'
 import { CustomToaster } from '@/components/custom-toaster'
 import { FancyToaster } from '@/components/fancy-toaster'
 import { useConfigStore } from './config'
@@ -93,195 +95,218 @@ interface ResultState {
   initialize: () => void
 }
 
-export const useResultStore = create<ResultState>((set, get) => ({
-  isFifthRankToastShown: false,
-  setFifthRankToastShown: (shown) => set({ isFifthRankToastShown: shown }),
-  usedMoney: 0,
-  setUsedMoney: (money) => set({ usedMoney: money }),
-  addUsedMoney: (money) =>
-    set((state) => ({ usedMoney: state.usedMoney + money })),
-  submittedCount: 0,
-  setSubmittedCount: (count) => set({ submittedCount: count }),
-  addSubmittedCount: (count) =>
-    set((state) => ({ submittedCount: state.submittedCount + count })),
-  submittedTickets: [],
-  setSubmittedTickets: (tickets) => set({ submittedTickets: tickets }),
-  winningNumbers: null,
-  setWinningNumbers: (numbers) => set({ winningNumbers: numbers }),
-  winningRankCounts: createInitialWinningRankCounts(),
-  setWinningRankCounts: (updater) =>
-    set((state) => {
-      if (typeof updater === 'function') {
-        const nextCounts = updater(state.winningRankCounts)
-        return { winningRankCounts: nextCounts }
-      }
-      return { winningRankCounts: updater }
-    }),
-  totalPrize: 0,
-  setTotalPrize: (amount) => set({ totalPrize: amount }),
-  addTotalPrize: (amount) =>
-    set((state) => ({ totalPrize: state.totalPrize + amount })),
-  numberStatsMap: {},
-  setNumberStatsMap: (updater) => {
-    set((state) => {
-      if (typeof updater === 'function') {
-        const newMap = updater(state.numberStatsMap)
-        return { numberStatsMap: newMap }
-      }
-      return { numberStatsMap: updater }
-    })
-  },
-  history: [],
-  setHistory: (updater) =>
-    set((state) => {
-      if (typeof updater === 'function') {
-        return { history: updater(state.history) }
-      }
-      return { history: updater }
-    }),
-  submitLotto: (validForms: LottoFormSchema[]) => {
-    if (validForms.length === 0) return
-
-    const state = get()
-    const {
-      isFifthRankToastShown,
-      setFifthRankToastShown,
-      numberStatsMap: currentNumberStatsMap,
-      winningRankCounts: currentWinningRankCounts,
-      history: currentHistory,
-    } = state
-    const { prizeMap } = useConfigStore.getState()
-    const cost = validForms.length * 1000
-
-    const normalizedForms = validForms.map((form) =>
-      normalizeAndCompleteLottoNumbers(form.numbers)
-    )
-    const winningNumbers = generateLottoNumbers({ isContainBonusNumber: true })
-
-    const submissionRankCounts = createInitialWinningRankCounts()
-    let updatedNumberStatsMap = currentNumberStatsMap
-    const winningRanks: WinningRank[] = []
-
-    const prizes = normalizedForms.reduce((acc, form) => {
-      const result = checkLottoResult(form, winningNumbers)
-      const prize = prizeMap[result.rank as keyof typeof prizeMap] || 0
-
-      // 당첨 등수 수집
-      winningRanks.push(result.rank)
-
-      if (result.rank !== 0) {
-        switch (result.rank) {
-          case 1:
-          case 2:
-          case 3:
-            toast.custom(() => (
-              <FancyToaster
-                rank={result.rank}
-                prize={prize}
-                numbers={form}
-                winningNumbers={winningNumbers}
-              />
-            ))
-            break
-          case 4:
-            toast.custom(() => (
-              <CustomToaster
-                rank={result.rank}
-                prize={prize}
-                numbers={form}
-                winningNumbers={winningNumbers}
-              />
-            ))
-            break
-          case 5:
-            if (!isFifthRankToastShown) {
-              toast.custom(() => (
-                <CustomToaster
-                  rank={result.rank}
-                  prize={prize}
-                  numbers={form}
-                  winningNumbers={winningNumbers}
-                />
-              ))
-              setFifthRankToastShown(true)
-            }
-            break
-        }
-      }
-      submissionRankCounts[result.rank] =
-        (submissionRankCounts[result.rank] ?? 0) + 1
-      updatedNumberStatsMap = updateNumberStats(
-        updatedNumberStatsMap,
-        form,
-        result.matchedNumbers
-      )
-      return acc + prize
-    }, 0)
-
-    updatedNumberStatsMap = updateWinningNumberStats(
-      updatedNumberStatsMap,
-      winningNumbers
-    )
-
-    const nextWinningRankCounts = { ...currentWinningRankCounts }
-    for (const rank of TRACKED_RANKS) {
-      const submissionCount = submissionRankCounts[rank] ?? 0
-      if (!submissionCount) continue
-      nextWinningRankCounts[rank] =
-        (nextWinningRankCounts[rank] ?? 0) + submissionCount
-    }
-
-    const updatedUsedMoney = state.usedMoney + cost
-    const updatedTotalPrize = state.totalPrize + prizes
-    const updatedSubmittedCount = state.submittedCount + 1
-
-    const netProfit = updatedTotalPrize - updatedUsedMoney
-    const profitRate =
-      updatedUsedMoney === 0
-        ? 0
-        : ((updatedTotalPrize - updatedUsedMoney) / updatedUsedMoney) * 100
-
-    const lastSnapshot = currentHistory[currentHistory.length - 1]
-
-    const nextSnapshot: SimulationSnapshot = {
-      id: (lastSnapshot?.id ?? 0) + 1,
-      timestamp: Date.now(),
-      submittedCount: updatedSubmittedCount,
-      usedMoney: updatedUsedMoney,
-      totalPrize: updatedTotalPrize,
-      netProfit,
-      profitRate,
-      winningRanks,
-    }
-
-    const nextHistory = [...currentHistory, nextSnapshot]
-    const finalHistory =
-      nextHistory.length > MAX_HISTORY_LENGTH
-        ? nextHistory.slice(nextHistory.length - MAX_HISTORY_LENGTH)
-        : nextHistory
-
-    // 모든 상태를 한 번에 업데이트
-    set({
-      usedMoney: updatedUsedMoney,
-      totalPrize: updatedTotalPrize,
-      submittedCount: updatedSubmittedCount,
-      submittedTickets: normalizedForms,
-      winningNumbers,
-      numberStatsMap: updatedNumberStatsMap,
-      winningRankCounts: nextWinningRankCounts,
-      history: finalHistory,
-    })
-  },
-  initialize: () =>
-    set({
-      usedMoney: 0,
-      submittedCount: 0,
-      submittedTickets: [],
-      winningNumbers: null,
-      winningRankCounts: createInitialWinningRankCounts(),
-      totalPrize: 0,
-      numberStatsMap: {},
-      history: [],
+export const useResultStore = create<ResultState>()(
+  persist(
+    (set, get) => ({
       isFifthRankToastShown: false,
+      setFifthRankToastShown: (shown) => set({ isFifthRankToastShown: shown }),
+      usedMoney: 0,
+      setUsedMoney: (money) => set({ usedMoney: money }),
+      addUsedMoney: (money) =>
+        set((state) => ({ usedMoney: state.usedMoney + money })),
+      submittedCount: 0,
+      setSubmittedCount: (count) => set({ submittedCount: count }),
+      addSubmittedCount: (count) =>
+        set((state) => ({ submittedCount: state.submittedCount + count })),
+      submittedTickets: [],
+      setSubmittedTickets: (tickets) => set({ submittedTickets: tickets }),
+      winningNumbers: null,
+      setWinningNumbers: (numbers) => set({ winningNumbers: numbers }),
+      winningRankCounts: createInitialWinningRankCounts(),
+      setWinningRankCounts: (updater) =>
+        set((state) => {
+          if (typeof updater === 'function') {
+            const nextCounts = updater(state.winningRankCounts)
+            return { winningRankCounts: nextCounts }
+          }
+          return { winningRankCounts: updater }
+        }),
+      totalPrize: 0,
+      setTotalPrize: (amount) => set({ totalPrize: amount }),
+      addTotalPrize: (amount) =>
+        set((state) => ({ totalPrize: state.totalPrize + amount })),
+      numberStatsMap: {},
+      setNumberStatsMap: (updater) => {
+        set((state) => {
+          if (typeof updater === 'function') {
+            const newMap = updater(state.numberStatsMap)
+            return { numberStatsMap: newMap }
+          }
+          return { numberStatsMap: updater }
+        })
+      },
+      history: [],
+      setHistory: (updater) =>
+        set((state) => {
+          if (typeof updater === 'function') {
+            return { history: updater(state.history) }
+          }
+          return { history: updater }
+        }),
+      submitLotto: (validForms: LottoFormSchema[]) => {
+        if (validForms.length === 0) return
+
+        const state = get()
+        const {
+          isFifthRankToastShown,
+          setFifthRankToastShown,
+          numberStatsMap: currentNumberStatsMap,
+          winningRankCounts: currentWinningRankCounts,
+          history: currentHistory,
+        } = state
+        const { prizeMap } = useConfigStore.getState()
+        const cost = validForms.length * 1000
+
+        const normalizedForms = validForms.map((form) =>
+          normalizeAndCompleteLottoNumbers(form.numbers)
+        )
+        const winningNumbers = generateLottoNumbers({
+          isContainBonusNumber: true,
+        })
+
+        const submissionRankCounts = createInitialWinningRankCounts()
+        let updatedNumberStatsMap = currentNumberStatsMap
+        const winningRanks: WinningRank[] = []
+
+        const prizes = normalizedForms.reduce((acc, form) => {
+          const result = checkLottoResult(form, winningNumbers)
+          const prize = prizeMap[result.rank as keyof typeof prizeMap] || 0
+
+          // 당첨 등수 수집
+          winningRanks.push(result.rank)
+
+          if (result.rank !== 0) {
+            switch (result.rank) {
+              case 1:
+              case 2:
+              case 3:
+                toast.custom(() => (
+                  <FancyToaster
+                    rank={result.rank}
+                    prize={prize}
+                    numbers={form}
+                    winningNumbers={winningNumbers}
+                  />
+                ))
+                break
+              case 4:
+                toast.custom(() => (
+                  <CustomToaster
+                    rank={result.rank}
+                    prize={prize}
+                    numbers={form}
+                    winningNumbers={winningNumbers}
+                  />
+                ))
+                break
+              case 5:
+                if (!isFifthRankToastShown) {
+                  toast.custom(() => (
+                    <CustomToaster
+                      rank={result.rank}
+                      prize={prize}
+                      numbers={form}
+                      winningNumbers={winningNumbers}
+                    />
+                  ))
+                  setFifthRankToastShown(true)
+                }
+                break
+            }
+          }
+          submissionRankCounts[result.rank] =
+            (submissionRankCounts[result.rank] ?? 0) + 1
+          updatedNumberStatsMap = updateNumberStats(
+            updatedNumberStatsMap,
+            form,
+            result.matchedNumbers
+          )
+          return acc + prize
+        }, 0)
+
+        updatedNumberStatsMap = updateWinningNumberStats(
+          updatedNumberStatsMap,
+          winningNumbers
+        )
+
+        const nextWinningRankCounts = { ...currentWinningRankCounts }
+        for (const rank of TRACKED_RANKS) {
+          const submissionCount = submissionRankCounts[rank] ?? 0
+          if (!submissionCount) continue
+          nextWinningRankCounts[rank] =
+            (nextWinningRankCounts[rank] ?? 0) + submissionCount
+        }
+
+        const updatedUsedMoney = state.usedMoney + cost
+        const updatedTotalPrize = state.totalPrize + prizes
+        const updatedSubmittedCount = state.submittedCount + 1
+
+        const netProfit = updatedTotalPrize - updatedUsedMoney
+        const profitRate =
+          updatedUsedMoney === 0
+            ? 0
+            : ((updatedTotalPrize - updatedUsedMoney) / updatedUsedMoney) * 100
+
+        const lastSnapshot = currentHistory[currentHistory.length - 1]
+
+        const nextSnapshot: SimulationSnapshot = {
+          id: (lastSnapshot?.id ?? 0) + 1,
+          timestamp: Date.now(),
+          submittedCount: updatedSubmittedCount,
+          usedMoney: updatedUsedMoney,
+          totalPrize: updatedTotalPrize,
+          netProfit,
+          profitRate,
+          winningRanks,
+        }
+
+        const nextHistory = [...currentHistory, nextSnapshot]
+        const finalHistory =
+          nextHistory.length > MAX_HISTORY_LENGTH
+            ? nextHistory.slice(nextHistory.length - MAX_HISTORY_LENGTH)
+            : nextHistory
+
+        // 모든 상태를 한 번에 업데이트
+        set({
+          usedMoney: updatedUsedMoney,
+          totalPrize: updatedTotalPrize,
+          submittedCount: updatedSubmittedCount,
+          submittedTickets: normalizedForms,
+          winningNumbers,
+          numberStatsMap: updatedNumberStatsMap,
+          winningRankCounts: nextWinningRankCounts,
+          history: finalHistory,
+        })
+      },
+      initialize: () =>
+        set({
+          usedMoney: 0,
+          submittedCount: 0,
+          submittedTickets: [],
+          winningNumbers: null,
+          winningRankCounts: createInitialWinningRankCounts(),
+          totalPrize: 0,
+          numberStatsMap: {},
+          history: [],
+          isFifthRankToastShown: false,
+        }),
     }),
-}))
+    {
+      name: `${STORAGE_KEY_PREFIX}:result`,
+      version: 1,
+      storage: throttledStorage,
+      // 함수와 일회성 상태를 제외한 누적 결과만 저장
+      partialize: (state) => ({
+        isFifthRankToastShown: state.isFifthRankToastShown,
+        usedMoney: state.usedMoney,
+        submittedCount: state.submittedCount,
+        submittedTickets: state.submittedTickets,
+        winningNumbers: state.winningNumbers,
+        winningRankCounts: state.winningRankCounts,
+        totalPrize: state.totalPrize,
+        numberStatsMap: state.numberStatsMap,
+        history: state.history,
+      }),
+    }
+  )
+)
