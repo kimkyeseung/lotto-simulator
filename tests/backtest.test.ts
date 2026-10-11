@@ -76,6 +76,15 @@ describe('runBacktest', () => {
     assert.equal(result.prize, FALLBACK_PRIZES[1])
   })
 
+  it('reports fixed tickets in ascending order regardless of pick order', () => {
+    const result = runBacktest(
+      [[41, 3, 2, 40, 4, 1]],
+      [draw(1, '2026-01-03')],
+      FALLBACK_PRIZES
+    )
+    assert.deepEqual(result.best?.ticket, [1, 2, 3, 4, 40, 41])
+  })
+
   it('records the best (lowest) rank with its first draw', () => {
     const result = runBacktest(
       [[1, 2, 3, 4, 40, 41]],

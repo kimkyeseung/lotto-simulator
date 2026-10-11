@@ -77,7 +77,12 @@ export async function renderShareImage(payload: SharePayload): Promise<Blob> {
     const x = PADDING + index * (boxWidth + gap)
     ctx.fillStyle = COLORS.panel
     ctx.beginPath()
-    ctx.roundRect(x, boxTop, boxWidth, boxHeight, 20)
+    // roundRect 미지원 브라우저(구형 Safari 등)는 사각형으로 대체
+    if (typeof ctx.roundRect === 'function') {
+      ctx.roundRect(x, boxTop, boxWidth, boxHeight, 20)
+    } else {
+      ctx.rect(x, boxTop, boxWidth, boxHeight)
+    }
     ctx.fill()
 
     ctx.textAlign = 'center'

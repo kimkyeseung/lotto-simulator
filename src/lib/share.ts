@@ -7,20 +7,29 @@ const count = z.number().int().min(0).max(1e9)
  * 공유 링크에 담기는 결과 요약
  * - URL 해시에 담기므로 누구나 조작할 수 있다. 디코딩 시 반드시 검증한다.
  */
-const sharePayloadSchema = z.object({
-  v: z.literal(1),
-  kind: z.enum(['simulation', 'backtest']),
-  /** simulation: 구매 회차 수, backtest: 추첨 회차 수 */
-  rounds: count,
-  games: count,
-  spent: amount,
-  prize: amount,
-  /** 1~5등 당첨 횟수 */
-  ranks: z.array(count).length(5),
-  /** backtest 기간 (회차) */
-  from: count.optional(),
-  to: count.optional(),
-})
+const sharePayloadSchema = z
+  .object({
+    v: z.literal(1),
+    kind: z.enum(['simulation', 'backtest']),
+    /** simulation: 구매 회차 수, backtest: 추첨 회차 수 */
+    rounds: count,
+    games: count,
+    spent: amount,
+    prize: amount,
+    /** 1~5등 당첨 횟수 */
+    ranks: z.array(count).length(5),
+    /** backtest 기간 (회차) */
+    from: count.optional(),
+    to: count.optional(),
+  })
+  .refine(
+    (payload) =>
+      payload.kind !== 'backtest' ||
+      (payload.from !== undefined &&
+        payload.to !== undefined &&
+        payload.from <= payload.to),
+    { message: '백테스트 결과에는 기간(from, to)이 필요합니다.' }
+  )
 
 export type SharePayload = z.infer<typeof sharePayloadSchema>
 

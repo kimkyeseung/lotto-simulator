@@ -1,11 +1,11 @@
 'use client'
 
 import { useCallback } from 'react'
+import type { LottoFormSchema } from '@/schemas/lotto'
 import { useFormStore } from '@/stores/form'
 import { useLotto } from '@/hooks/use-lotto'
 import { Controller } from '@/components/controller'
 import { LottoForm } from '@/components/lotto-form'
-import type { LottoFormSchema } from '@/schemas/lotto'
 
 export function LottoTicketsForm() {
   const { formData, updateForm } = useFormStore()
@@ -49,6 +49,7 @@ export function LottoTicketsForm() {
             formName={t.name}
             key={t.name}
             initialNumbers={t.numbers}
+            initialEnabled={t.isEnabled}
             onFormChange={handlers[index]}
           />
         ))}

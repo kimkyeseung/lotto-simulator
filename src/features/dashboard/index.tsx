@@ -42,6 +42,7 @@ const LazyCharts = lazy(() =>
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState('overview')
+  const [isBacktestOpened, setIsBacktestOpened] = useState(false)
   const { isMobile } = useSidebar()
   const { usedMoney, totalPrize, submittedCount } = useResultStore(
     useShallow((state) => ({
@@ -117,7 +118,10 @@ export function Dashboard() {
         <Tabs
           orientation='vertical'
           value={activeTab}
-          onValueChange={setActiveTab}
+          onValueChange={(value) => {
+            setActiveTab(value)
+            if (value === 'backtest') setIsBacktestOpened(true)
+          }}
           className='space-y-4'
         >
           <div className='w-full overflow-x-auto pb-2'>
@@ -195,9 +199,14 @@ export function Dashboard() {
             </Suspense>
           </TabsContent>
 
-          <TabsContent value='backtest' className='space-y-4'>
+          {/* 자동 번호 결과가 탭을 오갈 때마다 바뀌지 않도록 처음 연 뒤에는 마운트 유지 */}
+          <TabsContent
+            value='backtest'
+            forceMount
+            className='space-y-4 data-[state=inactive]:hidden'
+          >
             <Suspense fallback={<AnalyticsFallback />}>
-              {activeTab === 'backtest' && <LazyBacktest />}
+              {isBacktestOpened && <LazyBacktest />}
             </Suspense>
           </TabsContent>
 

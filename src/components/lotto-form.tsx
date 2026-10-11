@@ -30,14 +30,20 @@ interface LottoFormProps {
   onFormChange: (data: LottoFormSchema) => void
   formName: LottoFormSchema['name']
   initialNumbers?: number[]
+  initialEnabled?: boolean
 }
 
-export const LottoForm = memo(function LottoForm({ onFormChange, formName, initialNumbers = [] }: LottoFormProps) {
+export const LottoForm = memo(function LottoForm({
+  onFormChange,
+  formName,
+  initialNumbers = [],
+  initialEnabled = true,
+}: LottoFormProps) {
   const form = useForm<LottoFormSchema>({
     resolver: zodResolver(lottoFormSchema),
     defaultValues: {
       name: formName,
-      isEnabled: true,
+      isEnabled: initialEnabled,
       numbers: initialNumbers,
     },
   })

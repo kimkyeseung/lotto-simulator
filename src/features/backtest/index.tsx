@@ -43,10 +43,8 @@ async function fetchDraws(): Promise<DrawsFile> {
   return response.json()
 }
 
-function subtractYears(date: string, years: number) {
-  const [year, rest] = [Number(date.slice(0, 4)), date.slice(4)]
-  return `${year - years}${rest}`
-}
+/** 로또는 매주 1회 추첨하므로 N년 = 최근 52×N회 */
+const DRAWS_PER_YEAR = 52
 
 export function Backtest() {
   const [range, setRange] = useState<RangeValue>('all')
@@ -67,9 +65,7 @@ export function Backtest() {
     if (!data) return []
     const years = RANGES.find((r) => r.value === range)?.years
     if (!years) return data.draws
-    const latestDate = data.draws[data.draws.length - 1].date
-    const fromDate = subtractYears(latestDate, years)
-    return data.draws.filter((draw) => draw.date > fromDate)
+    return data.draws.slice(-DRAWS_PER_YEAR * years)
   }, [data, range])
 
   const result = useMemo(

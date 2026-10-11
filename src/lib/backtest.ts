@@ -167,6 +167,10 @@ export function runBacktest(
   const nearMisses: NearMiss[] = []
   const sampleStep = Math.max(1, Math.ceil(draws.length / MAX_TIMELINE_POINTS))
   const winProbability = PRIZE_RANKS.map((rank) => RANK_PROBABILITIES[rank])
+  // 고정 번호는 선택한 순서대로 저장되어 있으므로 표시용으로 한 번 정렬해 둔다
+  const fixedTickets = tickets.map((ticket) =>
+    ticket.length === 6 ? [...ticket].sort((a, b) => a - b) : null
+  )
 
   let spent = 0
   let prize = 0
@@ -193,7 +197,7 @@ export function runBacktest(
 
     tickets.forEach((ticket, ticketIndex) => {
       const numbers =
-        ticket.length === 6 ? ticket : normalizeAndCompleteLottoNumbers(ticket)
+        fixedTickets[ticketIndex] ?? normalizeAndCompleteLottoNumbers(ticket)
       const result = checkLottoResult(numbers, winningNumbers)
       const mainMatchCount = result.matchedNumbers.filter(
         (n) => n !== draw.bonus

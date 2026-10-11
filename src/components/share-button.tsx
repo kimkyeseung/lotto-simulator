@@ -23,6 +23,16 @@ type ShareButtonProps = {
 const isAbortError = (error: unknown) =>
   error instanceof DOMException && error.name === 'AbortError'
 
+function downloadFile(file: File) {
+  const url = URL.createObjectURL(file)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = file.name
+  link.click()
+  // 클릭 직후 바로 해제하면 일부 브라우저에서 다운로드가 취소됨
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
 export function ShareButton({ payload, disabled }: ShareButtonProps) {
   const shareLink = async () => {
     const url = buildShareUrl(payload)
@@ -43,24 +53,26 @@ export function ShareButton({ payload, disabled }: ShareButtonProps) {
   }
 
   const shareImage = async () => {
+    let file: File
     try {
       const blob = await renderShareImage(payload)
-      const file = new File([blob], 'lotto-result.png', { type: 'image/png' })
+      file = new File([blob], 'lotto-result.png', { type: 'image/png' })
+    } catch {
+      toast.error('이미지를 만들지 못했어요.')
+      return
+    }
 
-      // 모바일에서는 공유 시트로 바로 보내고, 그 외에는 파일로 저장
-      if (navigator.canShare?.({ files: [file] })) {
+    // 모바일에서는 공유 시트로 바로 보내고, 그 외에는 파일로 저장
+    if (navigator.canShare?.({ files: [file] })) {
+      try {
         await navigator.share({ files: [file], title: getShareTitle(payload) })
         return
+      } catch (error) {
+        if (isAbortError(error)) return
+        // 이미지 생성이 길어져 사용자 동작이 만료된 경우 등은 다운로드로 대체
       }
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = file.name
-      link.click()
-      URL.revokeObjectURL(url)
-    } catch (error) {
-      if (!isAbortError(error)) toast.error('이미지를 만들지 못했어요.')
     }
+    downloadFile(file)
   }
 
   return (

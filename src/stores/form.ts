@@ -44,7 +44,8 @@ export const useFormStore = create<FormState>()(
             (form, index) =>
               form?.name === initialForms[index].name &&
               typeof form.isEnabled === 'boolean' &&
-              Array.isArray(form.numbers)
+              // 번호 범위·중복·개수 검증 (사용 여부와 무관하게 확인)
+              lottoFormSchema.safeParse({ ...form, isEnabled: true }).success
           )
         return isValid ? { ...current, formData } : current
       },

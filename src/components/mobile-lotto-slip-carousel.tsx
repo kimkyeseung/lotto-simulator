@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { type LottoFormSchema } from '@/schemas/lotto'
+import { type LottoFormSchema, lottoFormNames } from '@/schemas/lotto'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useFormStore } from '@/stores/form'
 import { cn } from '@/lib/utils'
@@ -48,11 +48,12 @@ export function MobileLottoSlipCarousel() {
     setTouchEnd(0)
   }
 
+  // 모든 슬라이드가 함께 렌더링되므로 현재 슬라이드가 아니라 용지 이름으로 위치를 찾는다
   const handleFormChange = useCallback(
     (formData: LottoFormSchema) => {
-      updateForm(currentIndex, formData)
+      updateForm(lottoFormNames.indexOf(formData.name), formData)
     },
-    [currentIndex, updateForm]
+    [updateForm]
   )
 
   return (
@@ -108,7 +109,12 @@ export function MobileLottoSlipCarousel() {
           >
             {tickets.map((t) => (
               <div key={t.name} className='w-full flex-shrink-0 px-1'>
-                <LottoForm formName={t.name} onFormChange={handleFormChange} />
+                <LottoForm
+                  formName={t.name}
+                  initialNumbers={t.numbers}
+                  initialEnabled={t.isEnabled}
+                  onFormChange={handleFormChange}
+                />
               </div>
             ))}
           </div>

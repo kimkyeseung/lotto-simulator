@@ -146,7 +146,10 @@ export function NumbersSection({
                 <YAxis
                   tick={{ fontSize: 11 }}
                   width={36}
-                  domain={['dataMin - 5', 'dataMax + 5']}
+                  domain={[
+                    (dataMin: number) => Math.max(0, dataMin - 5),
+                    'dataMax + 5',
+                  ]}
                   allowDecimals={false}
                 />
                 <ReferenceLine

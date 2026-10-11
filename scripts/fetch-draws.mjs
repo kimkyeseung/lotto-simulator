@@ -1,6 +1,8 @@
 /**
  * 동행복권 로또 6/45 역대 당첨번호를 받아 public/data/draws.json에 저장한다.
  * - 기존 파일이 있으면 마지막 회차 이후만 이어서 받는다.
+ *   (추첨 직후 값이 정정될 수 있어 최근 REFRESH_DRAWS개 회차는 매번 다시 받는다)
+ * - 4·5등 당첨금이 0이면 아직 집계 전인 회차로 보고 저장하지 않는다.
  * - 동행복권 홈페이지 내부 API(비공식)를 사용하므로 응답 형식이 바뀌면 검증 단계에서 실패한다.
  *
  * 사용법: node scripts/fetch-draws.mjs
@@ -16,6 +18,7 @@ const OUTPUT_PATH = resolve(
 const API_URL = 'https://www.dhlottery.co.kr/lt645/selectPstLt645InfoNew.do'
 const REQUEST_DELAY_MS = 300
 const MAX_REQUESTS = 300
+const REFRESH_DRAWS = 10
 
 const log = (message) => process.stdout.write(`${message}\n`)
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -89,10 +92,14 @@ async function readExisting() {
   }
 }
 
+/** 4·5등은 매 회차 당첨자가 있으므로 0이면 당첨금이 아직 집계되지 않은 것 */
+const isPrizeFinalized = (draw) => draw.prizes[3] > 0 && draw.prizes[4] > 0
+
 async function main() {
-  const draws = new Map((await readExisting()).map((d) => [d.no, d]))
-  const startCount = draws.size
-  let cursor = Math.max(0, ...draws.keys())
+  const existing = await readExisting()
+  const draws = new Map(existing.map((d) => [d.no, d]))
+  const lastNo = Math.max(0, ...draws.keys())
+  let cursor = Math.max(0, lastNo - REFRESH_DRAWS)
 
   for (let i = 0; i < MAX_REQUESTS; i++) {
     // 'latest' 방향은 커서 다음 회차부터 최대 10개를 돌려준다. 1회차는 커서 0으로 조회되지 않아 'center'로 받는다.
@@ -101,11 +108,23 @@ async function main() {
         ? await fetchPage({ srchDir: 'center', srchLtEpsd: '1' })
         : await fetchPage({ srchDir: 'latest', srchCursorLtEpsd: String(cursor) })
 
-    const newDraws = list.map(toDraw).filter((d) => d.no > cursor)
+    const newDraws = list
+      .map(toDraw)
+      .filter((d) => d.no > cursor)
+      .sort((a, b) => a.no - b.no)
     if (newDraws.length === 0) break
 
-    for (const draw of newDraws) draws.set(draw.no, draw)
-    cursor = Math.max(cursor, ...newDraws.map((d) => d.no))
+    const pending = newDraws.find((d) => !isPrizeFinalized(d))
+    for (const draw of newDraws) {
+      if (pending && draw.no >= pending.no) break
+      draws.set(draw.no, draw)
+    }
+    if (pending) {
+      log(`${pending.no}회 당첨금이 아직 집계되지 않아 이전 회차까지만 저장합니다.`)
+      break
+    }
+
+    cursor = newDraws[newDraws.length - 1].no
     log(`~${cursor}회차까지 수집`)
     await sleep(REQUEST_DELAY_MS)
   }
@@ -117,17 +136,17 @@ async function main() {
     }
   })
 
-  if (sorted.length === startCount) {
-    log(`새 회차 없음 (최신 ${cursor}회)`)
+  const latest = sorted.length
+  const output = `${JSON.stringify({ latest, draws: sorted })}\n`
+  const previous = await readFile(OUTPUT_PATH, 'utf8').catch(() => '')
+  if (output === previous) {
+    log(`변경 없음 (최신 ${latest}회)`)
     return
   }
 
   await mkdir(dirname(OUTPUT_PATH), { recursive: true })
-  await writeFile(
-    OUTPUT_PATH,
-    `${JSON.stringify({ latest: cursor, draws: sorted })}\n`
-  )
-  log(`${sorted.length - startCount}개 회차 추가 → 총 ${sorted.length}회`)
+  await writeFile(OUTPUT_PATH, output)
+  log(`저장 완료: 총 ${latest}회 (이전 ${existing.length}회)`)
 }
 
 main().catch((error) => {
