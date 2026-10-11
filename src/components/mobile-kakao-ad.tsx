@@ -12,7 +12,7 @@ export function MobileKakaoAd() {
   const height =
     Number(import.meta.env.VITE_KAKAO_MOBILE_AD_HEIGHT) || DEFAULT_HEIGHT
 
-  if (!isMobile) {
+  if (!isMobile || !unitId) {
     return null
   }
 
