@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- 벤치마크 결과를 콘솔로 출력하는 테스트 */
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { performance } from 'node:perf_hooks'
