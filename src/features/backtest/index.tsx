@@ -19,7 +19,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ShareButton } from '@/components/share-button'
 import { LuckSection } from './components/luck-section'
+import { NumbersSection } from './components/numbers-section'
+import { OpportunitySection } from './components/opportunity-section'
 import { SummarySection } from './components/summary-section'
+import { TicketsSection } from './components/tickets-section'
 import { TimelineSection } from './components/timeline-section'
 import { useLuckSimulation } from './use-luck-simulation'
 
@@ -92,6 +95,14 @@ export function Backtest() {
     [result, luck.netProfits]
   )
 
+  const ticketNumbers = useMemo(
+    () => tickets.map((ticket) => ticket.numbers),
+    [tickets]
+  )
+  const ticketNames = useMemo(
+    () => tickets.map((ticket) => ticket.name),
+    [tickets]
+  )
   const hasAutoTicket = tickets.some((ticket) => ticket.numbers.length < 6)
   const firstDraw = draws[0]
   const lastDraw = draws[draws.length - 1]
@@ -178,6 +189,18 @@ export function Backtest() {
             isSimulationFailed={luck.status === 'error'}
           />
           <TimelineSection result={result} />
+          <NumbersSection
+            result={result}
+            draws={draws}
+            tickets={ticketNumbers}
+            ticketNames={ticketNames}
+          />
+          <TicketsSection result={result} ticketNames={ticketNames} />
+          <OpportunitySection
+            result={result}
+            draws={draws}
+            gamesPerDraw={tickets.length}
+          />
         </>
       ) : (
         <Card>

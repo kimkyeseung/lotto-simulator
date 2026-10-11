@@ -33,6 +33,8 @@ export type BacktestBest = {
 export type BacktestTimelinePoint = {
   no: number
   date: string
+  /** 해당 회차까지 누적 구매액 */
+  spent: number
   netProfit: number
 }
 
@@ -275,7 +277,7 @@ export function runBacktest(
     maxDrawdown = Math.max(maxDrawdown, peakNetProfit - netProfit)
 
     if (drawIndex % sampleStep === 0 || drawIndex === draws.length - 1) {
-      timeline.push({ no: draw.no, date: draw.date, netProfit })
+      timeline.push({ no: draw.no, date: draw.date, spent, netProfit })
     }
   })
 
